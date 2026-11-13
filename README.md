@@ -47,6 +47,7 @@ python tests/test_quality.py
 python tests/test_kpis.py
 python tests/test_bi.py
 python tests/test_model.py
+python tests/test_truncation.py
 python tests/test_forecast.py
 ```
 
@@ -58,7 +59,7 @@ python tests/test_forecast.py
 - Planned replacement share is 74.19%.
 - Assumed total cost is 5,490,630.
 - Test average precision is 0.997519 for boosting and 0.828968 for logistic regression.
-- At the selected threshold, 186 alerts cover 111 of 114 test failure events.
+- At the selected threshold, 189 alerts cover 114 of 114 test failure events.
 - The parts forecast uses 82 full weeks.
 
 ## Dashboard
@@ -71,4 +72,5 @@ hours, assumed downtime cost per hour, and proxy measures.
 ## Limits
 
 The source covers one year and has no repair durations or actual costs.
+The data is synthetic. The model score makes no claim about real equipment.
 Site and equipment groupings are simulated.

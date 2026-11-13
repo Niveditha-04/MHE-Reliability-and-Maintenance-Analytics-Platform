@@ -21,7 +21,9 @@ by validation average precision. The metric is average precision, with
 permutation importance measures the drop in average precision.
 
 The threshold minimizes assumed validation cost over score quantiles and
-a no-alert threshold. An alert suppresses further alerts for 24 hours.
+a no-alert threshold. An alert suppresses further alerts for 24 hours. Validation and test policy
+scoring include the 24 hours before the split. Those scores carry no
+training or evaluation labels.
 A failure is caught when an alert fired in the preceding 24 hours, excluding
 the event hour. Inspection costs 100 per alert. Missed-event cost uses the
 assumed repair duration times the assumed hourly downtime rate, which is
@@ -33,14 +35,21 @@ and are not calibrated probabilities.
 Parts demand counts Monday 06:00 to Monday 06:00 replacements, with partial
 weeks excluded. Four- and eight-week means and simple exponential smoothing
 are compared on rolling origins over the final 12 weeks. The smoothing
-parameter is selected on earlier weeks. MAE uses only horizons with known
-actuals. The four weeks after the last full source week use Poisson
-80% ranges conditional on each point forecast. Planned replacements follow
+parameter is selected on earlier 2015 weeks, beginning January 5 at 06:00. MAE uses only horizons with known
+actuals. The four weeks after the last full source week use 80% Poisson ranges conditional on each point forecast. Empirical residual
+quantiles provide a fallback when pooled coverage for a component is below
+70%. All four components meet the coverage cutoff. Planned replacements follow
 a fixed cycle, so the reactive part is the less predictable part.
 
+The source is synthetic. The model score makes no claim about real equipment.
 The source has one year of telemetry and few test failure events. Site and
 equipment groupings are simulated. Repair hours and costs are assumed.
 
-The first forecast week starts on 2015-12-28 at 06:00. Its partial source
-week is excluded from fitting. The published forecast spans four full
-weekly buckets after the last complete source week.
+The partial week starting 2015-12-28 at 06:00 is shown separately and
+excluded from fitting. Forecasts start on 2016-01-04 at 06:00. Planned
+and reactive shares use the 2015 reporting window and exact failure matches.
+
+The asset risk field uses the share of November and December test hours at
+or above the validation threshold. The measure is selected descriptively
+using test-period event counts. November and December ranks have Spearman
+correlation 0.020, so the ranking has low month-to-month stability.

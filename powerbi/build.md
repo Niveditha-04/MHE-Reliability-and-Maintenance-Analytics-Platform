@@ -88,7 +88,8 @@ Assumed Total Cost = [Assumed Replacement Cost] + [Assumed Downtime Cost]
    the site breakdown labeled simulated site mapping.
 2. Site and equipment drill-down. Use site, equipment type, and machine from
    the machine dimension. Plot monthly KPIs and add the asset table. Filter
-   network_position to 10 or less and sort ascending. Label it “Network ranking, not filtered by slicers.”
+   network_position to 10 or less and sort ascending. Label the risk field
+   “predicted risk, Nov to Dec.” Label it “Network ranking, not filtered by slicers.”
 3. Failure and cost trends. Chart component failures by month. Plot Assumed
    Replacement Cost and Assumed Downtime Cost as two series. Label every
    cost visual “assumed repair hours and assumed downtime cost per hour.”
@@ -96,7 +97,7 @@ Assumed Total Cost = [Assumed Replacement Cost] + [Assumed Downtime Cost]
    `vw_cost_sensitivity` CSV.
 4. Maintenance and spare parts. Chart planned and reactive replacements by
    component. Plot actual and forecast demand by week and component, with
-   the forecast method and the Poisson 80% range. Label the forecast
+   the forecast method and the 80% range. Show partial actuals separately. Label the forecast
    “weeks after the end of the source data.”
 
 Use a single palette. Label downtime-based visuals assumed repair hours.
@@ -125,7 +126,7 @@ Assumed repair hours and assumed downtime cost per hour (500).
 | Assumed total cost | 5490630 | Pending |
 | Assumed replacement cost | 1185630 | Pending |
 | Assumed downtime cost | 4305000 | Pending |
-| Network Top 10 order | 37, 20, 49, 83, 17, 22, 56, 85, 21, 13 | Pending |
+| Network Top 10 order | 83, 20, 37, 49, 99, 85, 17, 88, 13, 21 | Pending |
 
 Display MTBF to two decimal places (1,139.80). Display counts and assumed
 cost totals as whole numbers.

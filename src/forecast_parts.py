@@ -25,6 +25,13 @@ def choose_alpha(series):
                                          for i in range(8, len(series))))
 
 
+def interval(estimate, residuals, empirical):
+    if empirical:
+        low, high = estimate + np.quantile(residuals, [0.1, 0.9])
+        return max(0, np.floor(low)), np.ceil(high)
+    return poisson.ppf([0.1, 0.9], estimate)
+
+
 def weekly(db):
     return db.sql("""
         WITH bounds AS (
@@ -57,23 +64,48 @@ def forecast():
         for component, group in weekly(db).groupby("component"):
             y = group.actual.to_numpy(dtype=float)
             first_test = len(y) - 12
-            alpha = choose_alpha(y[:first_test])
+            eligible = group.week_start.dt.year.eq(2015).to_numpy() & (np.arange(len(y)) < first_test)
+            alpha = choose_alpha(y[eligible])
+            history = y[:first_test]
+            residuals = {method: [] for method in METHODS}
+            for origin in range(8, len(history)):
+                for method, estimate in zip(METHODS, predict(history[:origin], alpha)):
+                    for actual in history[origin:origin+4]:
+                        residuals[method].append(actual - estimate)
+            checks = []
             for origin in range(first_test, len(y)):
                 for method, estimate in zip(METHODS, predict(y[:origin], alpha)):
                     for ahead in range(1, min(4, len(y)-origin)+1):
-                        errors.append((component, method, ahead, abs(y[origin+ahead-1]-estimate)))
+                        actual = y[origin+ahead-1]
+                        low, high = poisson.ppf([0.1, 0.9], estimate)
+                        checks.append((method, ahead, actual, estimate, low <= actual <= high))
+            use_residuals = np.mean([covered for _, _, _, _, covered in checks]) < .7
+            for method, ahead, actual, estimate, covered in checks:
+                low, high = interval(estimate, residuals[method], use_residuals)
+                errors.append((component, method, ahead, abs(actual-estimate),
+                               low <= actual <= high, covered, use_residuals))
             for week, actual in zip(group.week_start, y):
                 rows.append((component, week, "observed", actual, None, None, "actual"))
             for method, estimate in zip(METHODS, predict(y, alpha)):
-                low, high = poisson.ppf([0.1, 0.9], estimate)
+                low, high = interval(estimate, residuals[method], use_residuals)
                 for ahead in range(1, 5):
-                    week = group.week_start.iloc[-1] + pd.Timedelta(weeks=ahead)
+                    week = group.week_start.iloc[-1] + pd.Timedelta(weeks=ahead + 1)
                     rows.append((component, week, method, estimate, low, high, "forecast"))
-            shares.append((component, len(y), alpha, group.reactive.sum()/y.sum()))
+            reactive, total = db.execute("""
+                SELECT count(*) FILTER (WHERE replacement_class = 'reactive'), count(*)
+                FROM vw_replacement_class WHERE component = ?
+            """, [component]).fetchone()
+            partial = db.execute("""
+                SELECT count(*) FROM fact_maintenance
+                WHERE component = ? AND datetime >= ? + INTERVAL 1 WEEK
+            """, [component, group.week_start.iloc[-1]]).fetchone()[0]
+            rows.append((component, group.week_start.iloc[-1] + pd.Timedelta(weeks=1),
+                         "observed", partial, None, None, "partial"))
+            shares.append((component, len(y), alpha, reactive / total))
         tables = {
             "forecast_parts": pd.DataFrame(rows, columns=["component", "week_start", "method",
                                                          "forecast", "low", "high", "kind"]),
-            "forecast_errors": pd.DataFrame(errors, columns=["component", "method", "ahead", "error"]),
+            "forecast_errors": pd.DataFrame(errors, columns=["component", "method", "ahead", "error", "covered", "poisson_covered", "empirical"]),
             "forecast_shares": pd.DataFrame(shares, columns=["component", "weeks", "alpha", "reactive_share"]),
         }
         for name, table in tables.items():

@@ -106,7 +106,7 @@ CROSS JOIN ref_window AS w
 JOIN vw_kpi_model AS m ON s.model = m.model
 CROSS JOIN vw_kpi_network AS n
 JOIN rule_action AS a ON a.priority = CASE
-    WHEN s.failure_rank <= 10 AND m.failure_rate_per_1000h > n.failure_rate_per_1000h THEN 1
+    WHEN s.network_position <= 10 AND m.failure_rate_per_1000h > n.failure_rate_per_1000h THEN 1
     WHEN epoch(w.window_end - h.latest_replacement) / 3600 > h.median_hours THEN 2
     WHEN c.component IS NOT NULL THEN 3 ELSE 4 END
 ORDER BY network_position;

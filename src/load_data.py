@@ -1,9 +1,11 @@
+import os
 from pathlib import Path
 
 import duckdb
 
 ROOT = Path(__file__).resolve().parents[1]
-DATABASE = ROOT / "data" / "processed" / "maintenance.duckdb"
+DATABASE = Path(os.environ.get("MHE_DATABASE", ROOT / "data" / "processed" / "maintenance.duckdb"))
+REPORTS = Path(os.environ.get("MHE_REPORTS", ROOT / "reports"))
 SOURCES = {
     "raw_machines": "raw/PdM_machines.csv",
     "raw_telemetry": "raw/PdM_telemetry.csv",
@@ -20,7 +22,10 @@ def load():
     with duckdb.connect(str(DATABASE)) as db:
         db.begin()
         for table, filename in SOURCES.items():
-            db.read_csv(str(ROOT / "data" / filename), header=True).create_view(table)
+            source = ROOT / "data" / filename
+            if table != "raw_mapping" and "MHE_SAMPLE_DIR" in os.environ:
+                source = Path(os.environ["MHE_SAMPLE_DIR"]) / source.name
+            db.read_csv(str(source), header=True).create_view(table)
         db.execute(schema)
         for table in SOURCES:
             db.execute(f"DROP VIEW {table}")

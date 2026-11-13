@@ -34,6 +34,8 @@ Python, DuckDB, SQL, pandas, NumPy, scikit-learn, and Git.
 
 ## How to run
 
+Full dataset, with Python 3.14.4.
+
 ```sh
 python -m pip install -r requirements.txt
 python src/load_data.py
@@ -49,7 +51,26 @@ python tests/test_bi.py
 python tests/test_model.py
 python tests/test_truncation.py
 python tests/test_forecast.py
+python src/weekly_report.py
 ```
+
+Sample pipeline and report.
+
+```sh
+python -m pip install -r requirements.txt
+python src/weekly_report.py --sample
+python tests/test_report.py
+```
+
+The sample command loads the synthetic CSVs into a temporary database,
+runs quality checks, builds features, trains and scores the model, builds
+KPI views, forecasts demand, and exports the dashboard tables. The full
+report command uses the existing full-data model and forecast tables.
+
+GitHub Actions runs the sample every Monday at 06:00 UTC and on manual
+dispatch. The artifact contains the weekly report and quality results.
+Local sample reports are written to `reports/sample/`. Snapshots compare
+report runs on static input.
 
 ## Results
 
@@ -77,3 +98,17 @@ Average precision for failures 24 to 48 hours ahead is 0.83. The signal extends 
 The validation comparison covers two boosting settings.
 The data is synthetic. The model score makes no claim about real equipment.
 Site and equipment groupings are simulated.
+
+Alerts cost 100 and a missed event costs at least 1,000. Event scores are
+well separated from other hours. One threshold wins at every tested cost
+ratio. The search found no cost trade-off.
+
+The 24-hour label concentrates lead times near 24 hours. The median is
+24 hours, the range is 8 to 26 hours, and no event had 48 hours of lead.
+
+Within models 1 to 3, half-year machine failure ranks have Spearman
+correlations of 0.03 to 0.10. Model differences account for much of the
+pooled 0.46. The ranking is labeled “failures plus alert history, Sep to Oct”.
+
+The 80% forecast intervals cover 83.3% of comp2 and 78.6% of comp3
+backtest observations for the selected methods.

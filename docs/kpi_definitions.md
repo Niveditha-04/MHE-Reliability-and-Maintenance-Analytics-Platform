@@ -57,3 +57,17 @@ downtime cost is 500 per hour for every component.
 The reporting month starts at 06:00 on the first. Component slicers filter
 only the event and cost tables. The cost view splits simultaneous
 multi-component event downtime equally across the failed components.
+
+Alerts cost 100 and a missed event costs at least 1,000. Event scores are
+well separated from other hours. One threshold wins at every tested cost
+ratio. The search found no cost trade-off.
+
+The 24-hour label concentrates lead times near 24 hours. The median is
+24 hours, the range is 8 to 26 hours, and no event had 48 hours of lead.
+
+Within models 1 to 3, half-year machine failure ranks have Spearman
+correlations of 0.03 to 0.10. Model differences account for much of the
+pooled 0.46. The ranking is labeled “failures plus alert history, Sep to Oct”.
+
+The 80% forecast intervals cover 83.3% of comp2 and 78.6% of comp3
+backtest observations for the selected methods.

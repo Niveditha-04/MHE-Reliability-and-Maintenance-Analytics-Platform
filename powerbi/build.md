@@ -91,7 +91,7 @@ Assumed Total Cost = [Assumed Replacement Cost] + [Assumed Downtime Cost]
 2. Site and equipment drill-down. Use site, equipment type, and machine from
    the machine dimension. Plot monthly KPIs and add the asset table. Filter
    network_position to 10 or less and sort ascending. Label the risk field
-   “predicted risk, Sep to Oct.” Label it “Network ranking, not filtered by slicers.”
+   “failures plus alert history, Sep to Oct.” Label it “Network ranking, not filtered by slicers.”
 3. Failure and cost trends. Chart component failures by month. Plot Assumed
    Replacement Cost and Assumed Downtime Cost as two series. Label every
    cost visual “assumed repair hours and assumed downtime cost per hour.”

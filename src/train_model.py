@@ -7,7 +7,7 @@ from sklearn.preprocessing import StandardScaler
 from threadpoolctl import threadpool_limits
 
 from alert_policy import costs, hours
-from load_data import DATABASE, ROOT
+from load_data import DATABASE, REPORTS, ROOT
 from model_audit import ablations, booster
 
 SEED = 42
@@ -29,7 +29,7 @@ def fit(frames, policy_frames, later):
     model = candidates[tuning.auc_pr.idxmax()]
     audit = ablations(train, validation, y, vy, later, model.max_leaf_nodes)
     importance = permutation_importance(model, validation, vy, scoring="average_precision",
-                                        random_state=SEED, n_repeats=2, max_samples=10000)
+                                        random_state=SEED, n_repeats=2, max_samples=min(10000, len(validation)))
     scores = []
     for frame, matrix in zip(frames[1:], (validation, test)):
         scores.append({"positive rate": np.zeros(len(frame)),
@@ -115,7 +115,8 @@ def train():
         predictions = frames[-1][["machine_id", "datetime"]].assign(probability=scores[-1]["boosting"])
         hourly = inference[["machine_id", "datetime", "target", "split"]].assign(
             probability=policy_scores[2])
-        curve.to_csv(ROOT / "reports" / "threshold_curve.csv", index=False)
+        REPORTS.mkdir(parents=True, exist_ok=True)
+        curve.to_csv(REPORTS / "threshold_curve.csv", index=False)
         for name, table in [("model_metrics", results), ("model_threshold_costs", policies),
                             ("model_test_predictions", predictions), ("model_importance", importance),
                             ("model_hourly_scores", hourly), ("model_tuning", tuning), ("model_ablation", audit), ("model_cost_curve", curve)]:

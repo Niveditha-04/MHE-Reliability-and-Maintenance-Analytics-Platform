@@ -81,5 +81,5 @@ CREATE OR REPLACE TABLE assumptions_model AS
 SELECT 'inspection_cost_per_alert' AS parameter, 100 AS value, 'assumed' AS basis;
 
 CREATE TABLE IF NOT EXISTS model_machine_risk (
-    machine_id BIGINT, mean_risk DOUBLE, predicted_risk_rank BIGINT
+    machine_id BIGINT, mean_risk DOUBLE, predicted_risk_rank BIGINT, use_model BOOLEAN
 );

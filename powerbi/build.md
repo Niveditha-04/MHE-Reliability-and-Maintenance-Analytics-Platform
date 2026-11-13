@@ -6,14 +6,16 @@ monthly aggregates and asset ranks.
 
 ## Model
 
-Disable Auto date/time in Options before importing the eleven CSVs.
+Disable Auto date/time in Options before importing the thirteen CSVs.
 
 Import `dim_machine`, `dim_component`, `vw_machine_monthly`,
 `vw_events_monthly`, `vw_cost_detail`, `vw_top_assets`, and `vw_cost_sensitivity`. Use whole numbers
 for IDs and counts, dates for month, and decimal numbers for rates and hours.
 Also import `model_machine_risk`, `model_metrics`, `model_threshold_costs`,
-and `forecast_parts`. Keep these tables disconnected. The risk table
-supports the machine-risk detail, and the metrics and cost tables support
+`forecast_parts`, `model_machine_current`, and `threshold_curve`. Keep these tables disconnected. The risk table
+supports the machine-risk detail. The current score table is labeled
+“model view at the end of the source data.” The threshold curve supports
+validation cost review, and the metrics and cost tables support
 model validation. The forecast table uses its own component selector.
 
 Create a month table with one row per month for the shared monthly axis across the three facts.
@@ -89,7 +91,7 @@ Assumed Total Cost = [Assumed Replacement Cost] + [Assumed Downtime Cost]
 2. Site and equipment drill-down. Use site, equipment type, and machine from
    the machine dimension. Plot monthly KPIs and add the asset table. Filter
    network_position to 10 or less and sort ascending. Label the risk field
-   “predicted risk, Nov to Dec.” Label it “Network ranking, not filtered by slicers.”
+   “predicted risk, Sep to Oct.” Label it “Network ranking, not filtered by slicers.”
 3. Failure and cost trends. Chart component failures by month. Plot Assumed
    Replacement Cost and Assumed Downtime Cost as two series. Label every
    cost visual “assumed repair hours and assumed downtime cost per hour.”
@@ -126,7 +128,7 @@ Assumed repair hours and assumed downtime cost per hour (500).
 | Assumed total cost | 5490630 | Pending |
 | Assumed replacement cost | 1185630 | Pending |
 | Assumed downtime cost | 4305000 | Pending |
-| Network Top 10 order | 83, 20, 37, 49, 99, 85, 17, 88, 13, 21 | Pending |
+| Network Top 10 order | 99, 37, 83, 13, 20, 71, 23, 21, 49, 90 | Pending |
 
 Display MTBF to two decimal places (1,139.80). Display counts and assumed
 cost totals as whole numbers.

@@ -37,7 +37,7 @@ def test_exports():
         assert db.sql("""
             SELECT list(machine_id ORDER BY network_position), count(DISTINCT rank_scope), min(rank_scope)
             FROM vw_top_assets WHERE network_position <= 10
-        """).fetchone() == ([83, 20, 37, 49, 99, 85, 17, 88, 13, 21], 1, "network")
+        """).fetchone() == ([99, 37, 83, 13, 20, 71, 23, 21, 49, 90], 1, "network")
         assert db.sql("""
             SELECT sum(failures), sum(reactive), sum(planned) FROM vw_events_monthly
         """).fetchone() == (761, 743, 2136)
@@ -78,14 +78,23 @@ def test_exports():
         """).fetchone() == (True,)
         assert db.sql("""
             SELECT count(*) FROM forecast_parts WHERE kind = 'partial'
-        """).fetchone() == (4,)
+        """).fetchone() == (8,)
         assert db.sql("""
             SELECT count(DISTINCT week_start), min(week_start)::DATE::VARCHAR,
                    max(week_start)::DATE::VARCHAR FROM forecast_parts WHERE kind = 'forecast'
         """).fetchone() == (4, "2016-01-04", "2016-01-25")
-        for name in ("model_machine_risk", "model_metrics", "model_threshold_costs", "forecast_parts"):
+        for name in ("model_machine_risk", "model_metrics", "model_threshold_costs", "forecast_parts",
+                     "model_machine_current"):
             exported = db.read_csv(str(DATABASE.parent / f"{name}.csv"))
             assert sorted(exported.fetchall(), key=str) == sorted(db.table(name).fetchall(), key=str)
+        curve = db.read_csv(str(DATABASE.parent / "threshold_curve.csv"))
+        assert curve.order("split, threshold").fetchall() == db.sql("""
+            FROM model_cost_curve ORDER BY split, threshold
+        """).fetchall()
+        assert db.sql("""
+            SELECT count(*) FROM model_machine_current
+            WHERE score_at_end BETWEEN 0 AND 1 AND alerts_last_30_days >= 0
+        """).fetchone() == (100,)
 
 
 if __name__ == "__main__":

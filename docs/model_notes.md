@@ -20,7 +20,7 @@ by validation average precision. The metric is average precision, with
 95% percentile intervals from 1,000 machine bootstrap samples. Validation
 permutation importance measures the drop in average precision.
 
-The threshold minimizes assumed validation cost over score quantiles and
+The threshold minimizes assumed validation cost over 501 thresholds spaced in logit space and
 a no-alert threshold. An alert suppresses further alerts for 24 hours. Validation and test policy
 scoring include the 24 hours before the split. Those scores carry no
 training or evaluation labels.
@@ -49,7 +49,20 @@ The partial week starting 2015-12-28 at 06:00 is shown separately and
 excluded from fitting. Forecasts start on 2016-01-04 at 06:00. Planned
 and reactive shares use the 2015 reporting window and exact failure matches.
 
-The asset risk field uses the share of November and December test hours at
-or above the validation threshold. The measure is selected descriptively
-using test-period event counts. November and December ranks have Spearman
-correlation 0.020, so the ranking has low month-to-month stability.
+The any-error rule also catches all 114 test events. Boosting fires fewer
+alerts at the same recall. Average precision for failures 24 to 48 hours
+ahead is 0.83. The signal extends beyond the next 24 hours. The validation
+comparison covers two boosting settings.
+
+A score and a failure count taken over the same period describe that period.
+Predictive agreement uses scores from September and October and counts from
+November and December. Their Spearman correlation is 0.191. Overall
+half-year failure count persistence is 0.465, so the network ranking retains
+the blend with the earlier score period.
+
+Forecast fitting and testing use the 51 full weeks starting January 5,
+2015. The 2014 weekly totals average about 12 against 55 in 2015 and
+alternate with zero weeks. The replacement history includes 2014 for age
+features and maintenance actions. The half-open KPI window contains 25
+start-partial replacements, 2,807 full-week replacements and 47 end-partial
+replacements.

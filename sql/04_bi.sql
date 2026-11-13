@@ -80,15 +80,21 @@ WITH components AS (
 ), ranks AS (
     SELECT machine_id, site_id, equipment_type, model, failures, mtbf_hours_assumed_repair,
            rank() OVER (ORDER BY failures DESC) AS failure_rank,
-           coalesce(r.predicted_risk_rank, count(*) OVER () + 1) AS predicted_risk_rank
+           coalesce(r.predicted_risk_rank, count(*) OVER () + 1) AS predicted_risk_rank, coalesce(r.use_model, false) AS use_model
     FROM vw_kpi_machine LEFT JOIN model_machine_risk AS r USING (machine_id)
 ), scored AS (
-    SELECT *, (failure_rank + predicted_risk_rank) / 2.0 AS risk_score,
-           row_number() OVER (ORDER BY failure_rank + predicted_risk_rank, failures DESC, machine_id)
-               AS network_position
+    SELECT *, CASE WHEN use_model THEN (failure_rank + predicted_risk_rank) / 2.0
+                   ELSE failure_rank END AS risk_score
     FROM ranks
+), positioned AS (
+    SELECT *,
+
+           row_number() OVER (ORDER BY risk_score, failures DESC,
+                                  CASE WHEN NOT use_model THEN mtbf_hours_assumed_repair END, machine_id)
+               AS network_position
+    FROM scored
 )
-SELECT s.* EXCLUDE (failure_rank, predicted_risk_rank), c.component AS top_failing_component,
+SELECT s.* EXCLUDE (failure_rank, predicted_risk_rank, use_model), c.component AS top_failing_component,
        'network' AS rank_scope,
        replace(a.action, '{component}', coalesce(c.component, '')) AS recommended_action,
        CASE a.priority
@@ -99,7 +105,7 @@ SELECT s.* EXCLUDE (failure_rank, predicted_risk_rank), c.component AS top_faili
            WHEN 3 THEN printf('%s: %d failures', c.component, c.failures)
            ELSE 'No component failures'
        END AS action_basis
-FROM scored AS s
+FROM positioned AS s
 LEFT JOIN components AS c USING (machine_id)
 LEFT JOIN vw_component_replacement_history AS h USING (machine_id, component)
 CROSS JOIN ref_window AS w

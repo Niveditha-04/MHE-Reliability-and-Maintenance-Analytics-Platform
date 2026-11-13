@@ -92,9 +92,16 @@ def train():
             """, [start, end]).df()
             policy["hour"] = hours(policy.datetime)
             policy_frames.append(policy)
+        inference = db.sql("""
+            SELECT * EXCLUDE (hour_number, last_hour, target_later)
+            FROM model_feature_grid CROSS JOIN ref_window
+            WHERE hour_number > 24 AND datetime <= window_end
+            ORDER BY datetime, machine_id
+        """).df().drop(columns=["window_start", "window_end", "window_hours", "readings_per_machine"])
+        inference["hour"] = hours(inference.datetime)
         with threadpool_limits(limits=2):
             scores, policy_scores, tuning, audit, importance = fit(
-                frames, policy_frames, (*later_targets, later_masks))
+                frames, [*policy_frames, inference], (*later_targets, later_masks))
 
             metrics = []
             for frame, methods in zip(frames[1:], scores):
@@ -103,12 +110,15 @@ def train():
                     metrics.append((method, frame.split.iloc[0], ap, low, high))
         results = pd.DataFrame(metrics, columns=["method", "split", "auc_pr", "range_low", "range_high"])
         errors = (policy_frames[1].filter(regex=r"^error").sum(axis=1) > 0).to_numpy()
-        policies, curve = costs(db, *policy_frames, events, policy_scores, errors)
+        policies, curve = costs(db, *policy_frames, events, policy_scores[:2], errors)
 
         predictions = frames[-1][["machine_id", "datetime"]].assign(probability=scores[-1]["boosting"])
+        hourly = inference[["machine_id", "datetime", "target", "split"]].assign(
+            probability=policy_scores[2])
+        curve.to_csv(ROOT / "reports" / "threshold_curve.csv", index=False)
         for name, table in [("model_metrics", results), ("model_threshold_costs", policies),
                             ("model_test_predictions", predictions), ("model_importance", importance),
-                            ("model_tuning", tuning), ("model_ablation", audit), ("model_cost_curve", curve)]:
+                            ("model_hourly_scores", hourly), ("model_tuning", tuning), ("model_ablation", audit), ("model_cost_curve", curve)]:
             db.register("model_output", table)
             db.execute(f"CREATE OR REPLACE TABLE {name} AS SELECT * FROM model_output")
             db.unregister("model_output")

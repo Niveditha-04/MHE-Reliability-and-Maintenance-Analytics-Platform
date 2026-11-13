@@ -34,7 +34,7 @@ and the count of events with a later maintenance record.
 
 - Assumed replacement cost sums the part and labor costs for each in-window replacement.
 - Assumed downtime cost allocates each event's downtime equally among its failed components and applies each component's assumed hourly cost. The cost falls in the month the event starts.
-- Asset risk averages the failure-count rank and the rank of the share of test hours at or above the alert threshold. Rank 1 is highest risk. Equal values share a rank and leave a gap. MTBF remains a separate metric.
+- Asset risk averages the failure-count rank and the rank of the share of September and October hours at or above the alert threshold. Rank 1 is highest risk. Equal values share a rank and leave a gap. MTBF remains a separate metric.
 - The top 10 uses ascending risk score, descending failures, and ascending machine ID. The network top 10 stays fixed when site or model slicers change.
 - The top failing component has the most failures, with component code breaking ties. Actions follow the rules below.
 

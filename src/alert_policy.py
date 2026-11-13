@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from scipy.special import expit, logit
 
 
 def fire(candidates):
@@ -13,8 +14,9 @@ def fire(candidates):
 def evaluate(rows, events, scores, threshold, inspection, missed_cost):
     alerts = caught = useful = 0
     leads = []
+    all_hours = rows.hour.to_numpy()
     for machine, positions in rows.groupby("machine_id", sort=False).indices.items():
-        hours = rows["hour"].to_numpy()[positions]
+        hours = all_hours[positions]
         candidates = hours[scores[positions] >= threshold]
         fired = fire(candidates)
         failures = events.get(machine, np.array([], dtype=int))
@@ -52,25 +54,34 @@ def costs(db, validation, test, failure_events, scores, error_scores):
         start, end = frame["datetime"].min() + pd.Timedelta(hours=24), frame["datetime"].max() + pd.Timedelta(hours=24)
         subset = failure_events[(failure_events.datetime >= start) & (failure_events.datetime <= end)]
         grouped.append({key: hours(group.datetime) for key, group in subset.groupby("machine_id")})
-    candidates = np.unique(np.r_[np.quantile(scores[0], np.linspace(0, 1, 41)), 1.01])
+    candidates = np.r_[expit(np.linspace(logit(.0005), logit(.9995), 501)), 1.01]
     trial = [evaluate(validation, grouped[0], scores[0], t, inspection, 0) for t in candidates]
-    results = []
-    curve = []
+    results, curve = [], []
+
+    def record(split, threshold, outcome):
+        return dict(split=split, threshold=threshold,
+                    **{k: outcome[k] for k in ("alerts", "caught", "missed", "false_alerts")},
+                    **{f"cost_ratio_{r}": inspection * (outcome["alerts"] + r*outcome["missed"])
+                       for r in (10, 30, 60)})
+
+    curve.extend(record("validation", t, row) for t, row in zip(candidates, trial))
+    test_results = {}
     for ratio in sorted({10, 30, base_ratio}):
         price = ratio * inspection
         index = min(range(len(trial)), key=lambda i: (trial[i]["cost"] + trial[i]["missed"] * price,
-                                                      trial[i]["alerts"], -candidates[i]))
+                                                      -candidates[i]))
         threshold = candidates[index]
-        nearest = sorted(range(len(candidates)), key=lambda i: abs(i-index))[:5]
-        for i in sorted(nearest):
-            curve.append((ratio, candidates[i], trial[i]["alerts"], trial[i]["missed"],
-                          trial[i]["cost"] + trial[i]["missed"] * price))
+        if threshold not in test_results:
+            outcome = evaluate(test, grouped[1], scores[1], threshold, inspection, 0)
+            test_results[threshold] = outcome
+            curve.append(record("test", threshold, outcome))
+        outcome = test_results[threshold]
         results.append(dict(policy="boosting", ratio=ratio, threshold=threshold,
-                            **evaluate(test, grouped[1], scores[1], threshold, inspection, price)))
+                            **(outcome | {"cost": inspection*outcome["alerts"] + price*outcome["missed"]})))
     for name, values, threshold in [("no alerts", np.zeros(len(test)), 1.01),
                                     ("any error", error_scores, 1.0)]:
         results.append(dict(policy=name, ratio=base_ratio, threshold=threshold,
                             **evaluate(test, grouped[1], values, threshold, inspection, repair*hourly)))
     for result in results:
         result["alerts_per_machine_month"] = result["alerts"] / (2 * test.machine_id.nunique())
-    return pd.DataFrame(results), pd.DataFrame(curve, columns=["ratio", "threshold", "alerts", "missed", "cost"])
+    return pd.DataFrame(results), pd.DataFrame(curve)

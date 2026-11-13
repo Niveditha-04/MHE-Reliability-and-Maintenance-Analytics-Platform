@@ -59,8 +59,8 @@ python tests/test_forecast.py
 - Planned replacement share is 74.19%.
 - Assumed total cost is 5,490,630.
 - Test average precision is 0.997519 for boosting and 0.828968 for logistic regression.
-- At the selected threshold, 189 alerts cover 114 of 114 test failure events.
-- The parts forecast uses 82 full weeks.
+- At the selected threshold, 116 alerts cover 114 of 114 test failure events.
+- The parts forecast uses 51 full weeks in 2015.
 
 ## Dashboard
 
@@ -72,5 +72,8 @@ hours, assumed downtime cost per hour, and proxy measures.
 ## Limits
 
 The source covers one year and has no repair durations or actual costs.
+The any-error rule also catches all 114 test events. Boosting fires fewer alerts at the same recall.
+Average precision for failures 24 to 48 hours ahead is 0.83. The signal extends beyond the next 24 hours.
+The validation comparison covers two boosting settings.
 The data is synthetic. The model score makes no claim about real equipment.
 Site and equipment groupings are simulated.

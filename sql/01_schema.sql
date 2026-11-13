@@ -70,3 +70,8 @@ FROM (VALUES
     ('comp3', 350, 120, 500, 'assumed'),
     ('comp4', 450, 150, 500, 'assumed')
 ) AS costs(component, part_cost, labor_cost, downtime_cost_per_hour, cost_basis);
+
+-- Repair hours are assumed.
+CREATE OR REPLACE TABLE assumptions_repair AS
+SELECT 'assumed_repair_hours' AS parameter, 12 AS value,
+       'assumed, no repair duration in source' AS basis;

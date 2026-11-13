@@ -51,3 +51,12 @@ keys match exactly for all 761 failure and 3,286 maintenance rows. The raw
 component codes are lowercase and have no leading or trailing spaces.
 
 [Unmatched failures and nearby maintenance](../reports/unmatched_failures.csv)
+
+Maintenance records follow a fixed cycle of about 15 days, so the interval to the next record is a schedule interval, not a repair time.
+
+Sixteen of the 18 unmatched failures have their latest earlier replacement
+for the same machine and component before the window. Machines 17 (comp4)
+and 51 (comp1) have their latest earlier replacement at the window start,
+2015-01-01 06:00:00.
+
+[Latest earlier replacement for all 18 failures](../reports/unmatched_failure_history.csv)

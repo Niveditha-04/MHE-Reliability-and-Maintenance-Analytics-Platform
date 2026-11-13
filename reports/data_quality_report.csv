@@ -1,0 +1,64 @@
+check,table,rows_failed,status
+null component,assumptions_cost,0,pass
+null part_cost,assumptions_cost,0,pass
+null labor_cost,assumptions_cost,0,pass
+null downtime_cost_per_hour,assumptions_cost,0,pass
+null cost_basis,assumptions_cost,0,pass
+null component,dim_component,0,pass
+null date,dim_date,0,pass
+null year,dim_date,0,pass
+null month,dim_date,0,pass
+null day,dim_date,0,pass
+null machine_id,dim_machine,0,pass
+null model,dim_machine,0,pass
+null age,dim_machine,0,pass
+null site_id,dim_machine,0,pass
+null equipment_type,dim_machine,0,pass
+null site_id,dim_site,0,pass
+null machine_id,fact_error,0,pass
+null datetime,fact_error,0,pass
+null error_id,fact_error,0,pass
+null failure_id,fact_failure,0,pass
+null machine_id,fact_failure,0,pass
+null datetime,fact_failure,0,pass
+null component,fact_failure,0,pass
+null maintenance_id,fact_maintenance,0,pass
+null machine_id,fact_maintenance,0,pass
+null datetime,fact_maintenance,0,pass
+null component,fact_maintenance,0,pass
+null machine_id,fact_telemetry,0,pass
+null datetime,fact_telemetry,0,pass
+null volt,fact_telemetry,0,pass
+null rotate,fact_telemetry,0,pass
+null pressure,fact_telemetry,0,pass
+null vibration,fact_telemetry,0,pass
+duplicate machine hour,fact_telemetry,0,pass
+missing hourly readings,fact_telemetry,0,pass
+orphan machine,fact_telemetry,0,pass
+orphan machine,fact_error,0,pass
+orphan machine,fact_maintenance,0,pass
+orphan machine,fact_failure,0,pass
+invalid sensor value,fact_telemetry,0,pass
+failure without replacement,fact_failure,18,warn
+duplicate event,fact_error,0,pass
+duplicate event,fact_maintenance,0,pass
+duplicate event,fact_failure,0,pass
+duplicate dimension key,dim_machine,0,pass
+duplicate dimension key,dim_site,0,pass
+duplicate dimension key,dim_component,0,pass
+duplicate dimension key,dim_date,0,pass
+row count differs from raw,fact_telemetry,0,pass
+row count differs from raw,fact_error,0,pass
+row count differs from raw,fact_maintenance,0,pass
+row count differs from raw,fact_failure,0,pass
+orphan component,fact_maintenance,0,pass
+orphan component,fact_failure,0,pass
+orphan component,assumptions_cost,0,pass
+invalid equipment type,dim_machine,0,pass
+timestamp off hour,fact_telemetry,0,pass
+timestamp off hour,fact_error,0,pass
+timestamp off hour,fact_maintenance,0,pass
+timestamp off hour,fact_failure,0,pass
+timestamp outside window,fact_error,0,pass
+timestamp outside window,fact_failure,0,pass
+timestamp outside window,fact_maintenance,0,pass

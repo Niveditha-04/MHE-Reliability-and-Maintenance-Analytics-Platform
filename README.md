@@ -65,7 +65,9 @@ python tests/test_report.py
 The sample command loads the synthetic CSVs into a temporary database,
 runs quality checks, builds features, trains and scores the model, builds
 KPI views, forecasts demand, and exports the dashboard tables. The full
-report command uses the existing full-data model and forecast tables.
+report command uses the existing full-data model and forecast tables. Run
+`python src/train_model.py`, `python src/score_machines.py`, and
+`python src/forecast_parts.py` before the full report to rebuild those tables.
 
 GitHub Actions runs the sample every Monday at 06:00 UTC and on manual
 dispatch. The artifact contains the weekly report and quality results.

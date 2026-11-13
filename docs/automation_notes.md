@@ -15,18 +15,17 @@ with an error 24 hours before each one. The fixture encodes the failure
 signal, so model scores on the sample are near perfect and say nothing
 about real data. Ties in the top five come from the generator.
 
-Kaggle license check, 13 Nov 2026. The dataset page did not expose a
-readable license line. The license was not verified. The repository
-contains no source CSV rows.
+Kaggle dataset license: [pending verification].
+The repository contains no source CSV rows.
 
 Full mode checks data quality, refreshes KPI views, and exports dashboard
-CSVs from the existing model and forecast tables. Run `python
-src/train_model.py`, `python src/score_machines.py`, and `python
-src/forecast_parts.py` before the full report to rebuild those outputs.
+CSVs from the existing model and forecast tables. Run
+`python src/train_model.py`, `python src/score_machines.py`, and
+`python src/forecast_parts.py` before the full report to rebuild those outputs.
 
 The artifact contains the Markdown report and quality CSV. The workflow
 cache holds two dated KPI snapshots. A missing prior-week snapshot gives
 an unavailable change. The workflow cache can expire after seven days
-without access. The next change then shows “Unavailable.” With static input and calculations, comparable
-runs give zero change. The snapshot tracks report runs and does not
-represent newly observed equipment data.
+without access. The next change then shows “Unavailable.” Comparable
+runs on static input with the same calculations give zero change. The
+snapshot tracks report runs on the same observation window.

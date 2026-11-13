@@ -73,3 +73,5 @@ failure timestamp.
 | DC-C | 2 | 7 | 12 | 33 / 137 (24.09%) |
 | DC-D | 0 | 7.5 | 13 | 35 / 141 (24.82%) |
 | DC-E | 3 | 8.5 | 19 | 49 / 178 (27.53%) |
+
+Two events have downtime below 12 hours, both from 03:00 to 06:00 on 2015-01-02. Machine 73 had its next failure and maintenance at 06:00. Machine 79 had its next maintenance at 06:00.

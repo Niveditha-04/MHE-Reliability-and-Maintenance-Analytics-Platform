@@ -1,0 +1,44 @@
+from pathlib import Path
+
+import duckdb
+
+DATABASE = Path(__file__).resolve().parents[1] / "data" / "processed" / "maintenance.duckdb"
+
+
+def test_exports():
+    with duckdb.connect(str(DATABASE), read_only=True) as db:
+        assert db.sql("""
+            SELECT sum(c.replacements) = any_value(n.reactive + n.planned),
+                   sum(c.allocated_downtime_hours) = any_value(n.downtime_hours),
+                   sum(c.assumed_downtime_cost) = 500 * any_value(n.downtime_hours),
+                   sum(c.assumed_replacement_cost) = (
+                       SELECT sum(part_cost + labor_cost)
+                       FROM vw_replacement_class JOIN assumptions_cost USING (component)
+                   )
+            FROM vw_cost_monthly c CROSS JOIN vw_kpi_network n
+        """).fetchone() == (True, True, True, True)
+        assert db.sql("""
+            SELECT sum(m.failures) = any_value(n.failures),
+                   sum(m.window_hours) = any_value(n.window_hours),
+                   sum(m.downtime_hours) = any_value(n.downtime_hours),
+                   sum(m.operating_hours) = any_value(n.operating_hours),
+                   sum(m.reactive) = any_value(n.reactive),
+                   sum(m.planned) = any_value(n.planned),
+                   sum(m.mttr_total) / sum(m.mttr_events) = any_value(n.mttr_proxy_hours)
+            FROM vw_machine_monthly m CROSS JOIN vw_kpi_network n
+        """).fetchone() == (True,) * 7
+        assert db.sql("""
+            SELECT sum(failures) FROM vw_machine_monthly JOIN dim_machine USING (machine_id)
+            WHERE site_id = 'DC-A'
+        """).fetchone() == (150,)
+        assert db.sql("""
+            SELECT count(*), count(DISTINCT machine_id) FROM vw_top_assets
+        """).fetchone() == (100, 100)
+        for name in ("vw_machine_monthly", "vw_cost_detail", "vw_events_monthly", "vw_top_assets"):
+            exported = db.read_csv(str(DATABASE.parent / f"{name}.csv"))
+            assert exported.count("*").fetchone() == db.table(name).count("*").fetchone()
+
+
+if __name__ == "__main__":
+    test_exports()
+    print("Cost, monthly KPIs, DC-A and export reconciliation passed")

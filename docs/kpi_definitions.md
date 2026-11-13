@@ -29,3 +29,11 @@ and the count of events with a later maintenance record.
 - Planned replacement share is a PM compliance proxy.
 - The MTTR proxy follows the maintenance schedule. Asset ranking excludes it.
 - Site and equipment type are simulated groupings. Model and component are from the source.
+
+## Dashboard measures
+
+- Assumed replacement cost sums the part and labor costs for each in-window replacement.
+- Assumed downtime cost allocates each event's downtime equally among its failed components and applies each component's assumed hourly cost. The cost falls in the month the event starts.
+- Asset risk averages fleet ranks for highest failures and lowest MTBF based on assumed repair hours. Rank 1 is worst. Equal values share a rank and leave a gap. A null MTBF ranks last.
+- The top 10 uses ascending risk score, descending failures, and ascending machine ID. Site and model filters select from the fleet ranks.
+- The top failing component has the most failures, with component code breaking ties. The action reviews its replacement interval. A machine without failures stays on routine inspection.

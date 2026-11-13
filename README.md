@@ -22,7 +22,7 @@ five CSVs and extract them into `data/raw/`.
 
 ## Tools
 
-Python, DuckDB, SQL, and Git.
+Python, DuckDB, SQL, pandas, NumPy, scikit-learn, and Git.
 
 ## Structure
 
@@ -30,7 +30,7 @@ Python, DuckDB, SQL, and Git.
 - `src/` contains the loader, quality runner, KPI builder, and exporter.
 - `tests/` contains reconciliation and fixture checks.
 - `docs/` contains data notes and KPI definitions.
-- `data/processed/` contains the local database and seven dashboard CSVs.
+- `data/processed/` contains the local database and dashboard CSVs.
 
 ## How to run
 
@@ -38,11 +38,16 @@ Python, DuckDB, SQL, and Git.
 python -m pip install -r requirements.txt
 python src/load_data.py
 python src/run_quality.py
+python src/train_model.py
+python src/score_machines.py
+python src/forecast_parts.py
 python src/build_kpis.py
 python src/export_bi.py
 python tests/test_quality.py
 python tests/test_kpis.py
 python tests/test_bi.py
+python tests/test_model.py
+python tests/test_forecast.py
 ```
 
 ## Results
@@ -52,7 +57,9 @@ python tests/test_bi.py
 - MTBF based on assumed repair hours is 1,139.80 hours.
 - Planned replacement share is 74.19%.
 - Assumed total cost is 5,490,630.
-- Dashboard verification checks passed: X.
+- Test average precision is 0.997519 for boosting and 0.828968 for logistic regression.
+- At the selected threshold, 186 alerts cover 111 of 114 test failure events.
+- The parts forecast uses 82 full weeks.
 
 ## Dashboard
 

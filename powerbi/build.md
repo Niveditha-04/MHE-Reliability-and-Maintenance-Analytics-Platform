@@ -6,11 +6,16 @@ monthly aggregates and asset ranks.
 
 ## Model
 
-Disable Auto date/time in Options before importing the seven CSVs.
+Disable Auto date/time in Options before importing the eleven CSVs.
 
 Import `dim_machine`, `dim_component`, `vw_machine_monthly`,
 `vw_events_monthly`, `vw_cost_detail`, `vw_top_assets`, and `vw_cost_sensitivity`. Use whole numbers
 for IDs and counts, dates for month, and decimal numbers for rates and hours.
+Also import `model_machine_risk`, `model_metrics`, `model_threshold_costs`,
+and `forecast_parts`. Keep these tables disconnected. The risk table
+supports the machine-risk detail, and the metrics and cost tables support
+model validation. The forecast table uses its own component selector.
+
 Create a month table with one row per month for the shared monthly axis across the three facts.
 
 ```dax
@@ -90,7 +95,9 @@ Assumed Total Cost = [Assumed Replacement Cost] + [Assumed Downtime Cost]
    Chart assumed total cost by repair hours using the disconnected
    `vw_cost_sensitivity` CSV.
 4. Maintenance and spare parts. Chart planned and reactive replacements by
-   component. Reserve a space for forecast demand.
+   component. Plot actual and forecast demand by week and component, with
+   the forecast method and the Poisson 80% range. Label the forecast
+   “weeks after the end of the source data.”
 
 Use a single palette. Label downtime-based visuals assumed repair hours.
 Label the maintenance interval and planned share as proxies.
@@ -118,7 +125,7 @@ Assumed repair hours and assumed downtime cost per hour (500).
 | Assumed total cost | 5490630 | Pending |
 | Assumed replacement cost | 1185630 | Pending |
 | Assumed downtime cost | 4305000 | Pending |
-| Network Top 10 order | 99, 98, 17, 22, 37, 83, 20, 71, 16, 13 | Pending |
+| Network Top 10 order | 37, 20, 49, 83, 17, 22, 56, 85, 21, 13 | Pending |
 
 Display MTBF to two decimal places (1,139.80). Display counts and assumed
 cost totals as whole numbers.

@@ -1,0 +1,86 @@
+import duckdb
+import numpy as np
+import pandas as pd
+from scipy.stats import poisson
+
+from load_data import DATABASE
+
+METHODS = ("mean 4", "mean 8", "smoothing")
+ALPHAS = (0.1, 0.2, 0.4, 0.6, 0.8)
+
+
+def smooth(series, alpha):
+    level = series[0]
+    for value in series[1:]:
+        level += alpha * (value - level)
+    return level
+
+
+def predict(series, alpha):
+    return (np.mean(series[-4:]), np.mean(series[-8:]), smooth(series, alpha))
+
+
+def choose_alpha(series):
+    return min(ALPHAS, key=lambda a: sum(abs(series[i] - smooth(series[:i], a))
+                                         for i in range(8, len(series))))
+
+
+def weekly(db):
+    return db.sql("""
+        WITH bounds AS (
+            SELECT min(datetime) AS start_at, max(datetime) AS end_at FROM fact_maintenance
+        ), weeks AS (
+            SELECT week_start FROM bounds
+            CROSS JOIN generate_series(
+                date_trunc('week', start_at - INTERVAL 6 HOUR) + INTERVAL 6 HOUR,
+                date_trunc('week', end_at - INTERVAL 6 HOUR) + INTERVAL 6 HOUR,
+                INTERVAL 1 WEEK
+            ) AS w(week_start)
+            WHERE week_start >= start_at AND week_start + INTERVAL 1 WEEK <= end_at
+        ), demand AS (
+            SELECT date_trunc('week', m.datetime - INTERVAL 6 HOUR) + INTERVAL 6 HOUR AS week_start,
+                   m.component, count(*) AS actual, count(f.failure_id) AS reactive
+            FROM fact_maintenance m LEFT JOIN fact_failure f USING (machine_id, datetime, component)
+            GROUP BY 1, 2
+        )
+        SELECT w.week_start, c.component, coalesce(d.actual, 0) AS actual,
+               coalesce(d.reactive, 0) AS reactive
+        FROM weeks w CROSS JOIN dim_component c
+        LEFT JOIN demand d USING (week_start, component)
+        ORDER BY component, week_start
+    """).df()
+
+
+def forecast():
+    with duckdb.connect(str(DATABASE)) as db:
+        rows, errors, shares = [], [], []
+        for component, group in weekly(db).groupby("component"):
+            y = group.actual.to_numpy(dtype=float)
+            first_test = len(y) - 12
+            alpha = choose_alpha(y[:first_test])
+            for origin in range(first_test, len(y)):
+                for method, estimate in zip(METHODS, predict(y[:origin], alpha)):
+                    for ahead in range(1, min(4, len(y)-origin)+1):
+                        errors.append((component, method, ahead, abs(y[origin+ahead-1]-estimate)))
+            for week, actual in zip(group.week_start, y):
+                rows.append((component, week, "observed", actual, None, None, "actual"))
+            for method, estimate in zip(METHODS, predict(y, alpha)):
+                low, high = poisson.ppf([0.1, 0.9], estimate)
+                for ahead in range(1, 5):
+                    week = group.week_start.iloc[-1] + pd.Timedelta(weeks=ahead)
+                    rows.append((component, week, method, estimate, low, high, "forecast"))
+            shares.append((component, len(y), alpha, group.reactive.sum()/y.sum()))
+        tables = {
+            "forecast_parts": pd.DataFrame(rows, columns=["component", "week_start", "method",
+                                                         "forecast", "low", "high", "kind"]),
+            "forecast_errors": pd.DataFrame(errors, columns=["component", "method", "ahead", "error"]),
+            "forecast_shares": pd.DataFrame(shares, columns=["component", "weeks", "alpha", "reactive_share"]),
+        }
+        for name, table in tables.items():
+            db.register("forecast_output", table)
+            db.execute(f"CREATE OR REPLACE TABLE {name} AS SELECT * FROM forecast_output")
+            db.unregister("forecast_output")
+
+
+if __name__ == "__main__":
+    forecast()

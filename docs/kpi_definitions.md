@@ -34,16 +34,9 @@ and the count of events with a later maintenance record.
 
 - Assumed replacement cost sums the part and labor costs for each in-window replacement.
 - Assumed downtime cost allocates each event's downtime equally among its failed components and applies each component's assumed hourly cost. The cost falls in the month the event starts.
-- Asset risk averages fleet ranks for highest failures and lowest MTBF based on assumed repair hours. Rank 1 is worst. Equal values share a rank and leave a gap. A null MTBF ranks last.
-- The top 10 uses ascending risk score, descending failures, and ascending machine ID. The network top 10 stays fixed when site or model slicers change. Machines 17 and 22 both have 15 failures, 573.6 hours MTBF based on assumed repair hours, and a score of 3. Machine 17 precedes 22 by machine ID.
+- Asset risk averages the failure-count rank and the rank of mean predicted probability over the test period. Rank 1 is highest risk. Equal values share a rank and leave a gap. MTBF remains a separate metric. Spearman rho between the two ranks is 0.462336 across 100 machines.
+- The top 10 uses ascending risk score, descending failures, and ascending machine ID. The network top 10 stays fixed when site or model slicers change.
 - The top failing component has the most failures, with component code breaking ties. Actions follow the rules below.
-
-Failure count and MTBF are strongly related because MTBF is derived from
-failures and operating hours after downtime. The risk score mostly ranks
-failure count. Spearman rho is 0.997806 across 100 machines, using average
-ranks for ties and placing undefined MTBF last. The score currently averages the failure rank and MTBF rank, which are
-almost the same ranking (Spearman 0.998). Phase 4 replaces the MTBF rank
-with the predicted-risk rank.
 
 Action rules use the first matching condition in this order.
 

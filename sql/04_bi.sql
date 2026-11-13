@@ -80,15 +80,15 @@ WITH components AS (
 ), ranks AS (
     SELECT machine_id, site_id, equipment_type, model, failures, mtbf_hours_assumed_repair,
            rank() OVER (ORDER BY failures DESC) AS failure_rank,
-           rank() OVER (ORDER BY mtbf_hours_assumed_repair ASC NULLS LAST) AS mtbf_rank
-    FROM vw_kpi_machine
+           coalesce(r.predicted_risk_rank, count(*) OVER () + 1) AS predicted_risk_rank
+    FROM vw_kpi_machine LEFT JOIN model_machine_risk AS r USING (machine_id)
 ), scored AS (
-    SELECT *, (failure_rank + mtbf_rank) / 2.0 AS risk_score,
-           row_number() OVER (ORDER BY failure_rank + mtbf_rank, failures DESC, machine_id)
+    SELECT *, (failure_rank + predicted_risk_rank) / 2.0 AS risk_score,
+           row_number() OVER (ORDER BY failure_rank + predicted_risk_rank, failures DESC, machine_id)
                AS network_position
     FROM ranks
 )
-SELECT s.* EXCLUDE (failure_rank, mtbf_rank), c.component AS top_failing_component,
+SELECT s.* EXCLUDE (failure_rank, predicted_risk_rank), c.component AS top_failing_component,
        'network' AS rank_scope,
        replace(a.action, '{component}', coalesce(c.component, '')) AS recommended_action,
        CASE a.priority

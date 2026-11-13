@@ -1,6 +1,10 @@
 CREATE OR REPLACE TABLE rule_action AS
-SELECT component, 'Review replacement interval for ' || component AS recommended_action
-FROM dim_component;
+SELECT * FROM (VALUES
+    (1, 'model_pattern', 'Check model fault pattern and review {component} replacement interval'),
+    (2, 'past_median', 'Inspect {component} before the next scheduled replacement'),
+    (3, 'component_review', 'Review replacement interval for {component}'),
+    (4, 'routine', 'Continue routine inspection')
+) AS rules(priority, rule, action);
 
 CREATE OR REPLACE VIEW vw_cost_detail AS
 WITH replacement_cost AS (
@@ -32,6 +36,41 @@ SELECT month, component, sum(replacements) AS replacements,
 FROM vw_cost_detail
 GROUP BY month, component;
 
+CREATE OR REPLACE VIEW vw_cost_sensitivity AS
+WITH rates AS (
+    SELECT f.machine_id, f.datetime, avg(c.downtime_cost_per_hour) AS hourly_cost
+    FROM vw_window_failures AS f JOIN assumptions_cost AS c USING (component)
+    GROUP BY f.machine_id, f.datetime
+), scenarios AS (
+    SELECT s.repair_hours,
+           coalesce(sum(least(s.repair_hours, e.event_limit_hours) * r.hourly_cost), 0)
+               AS assumed_downtime_cost
+    FROM vw_availability_sensitivity AS s
+    LEFT JOIN vw_failure_intervals AS e ON true
+    LEFT JOIN rates AS r ON r.machine_id = e.machine_id AND r.datetime = e.failure_time
+    GROUP BY s.repair_hours
+), replacements AS (
+    SELECT coalesce(sum(assumed_replacement_cost), 0) AS assumed_replacement_cost
+    FROM vw_cost_monthly
+)
+SELECT repair_hours, assumed_replacement_cost, assumed_downtime_cost,
+       assumed_replacement_cost + assumed_downtime_cost AS assumed_total_cost
+FROM scenarios CROSS JOIN replacements;
+
+CREATE OR REPLACE VIEW vw_component_replacement_history AS
+WITH intervals AS (
+    SELECT machine_id, component, datetime,
+           epoch(datetime - lag(datetime) OVER (
+               PARTITION BY machine_id, component ORDER BY datetime
+           )) / 3600 AS interval_hours
+    FROM vw_replacement_class
+), medians AS (
+    SELECT component, median(interval_hours) AS median_hours FROM intervals GROUP BY component
+)
+SELECT machine_id, component, max(datetime) AS latest_replacement, any_value(median_hours) AS median_hours
+FROM intervals JOIN medians USING (component)
+GROUP BY machine_id, component;
+
 CREATE OR REPLACE VIEW vw_top_assets AS
 WITH components AS (
     SELECT machine_id, component, count(*) AS failures
@@ -42,16 +81,23 @@ WITH components AS (
            rank() OVER (ORDER BY failures DESC) AS failure_rank,
            rank() OVER (ORDER BY mtbf_hours_assumed_repair ASC NULLS LAST) AS mtbf_rank
     FROM vw_kpi_machine
+), scored AS (
+    SELECT *, (failure_rank + mtbf_rank) / 2.0 AS risk_score,
+           row_number() OVER (ORDER BY failure_rank + mtbf_rank, failures DESC, machine_id)
+               AS network_position
+    FROM ranks
 )
-SELECT r.* EXCLUDE (failure_rank, mtbf_rank), c.component AS top_failing_component,
+SELECT s.* EXCLUDE (failure_rank, mtbf_rank), c.component AS top_failing_component,
        'network' AS rank_scope,
-       (failure_rank + mtbf_rank) / 2.0 AS risk_score,
-       coalesce(a.recommended_action, 'Continue routine inspection') AS recommended_action,
-       row_number() OVER (ORDER BY (failure_rank + mtbf_rank), r.failures DESC, r.machine_id)
-           AS network_position
-FROM ranks AS r
+       replace(a.action, '{component}', coalesce(c.component, '')) AS recommended_action
+FROM scored AS s
 LEFT JOIN components AS c USING (machine_id)
-LEFT JOIN rule_action AS a USING (component)
+LEFT JOIN vw_component_replacement_history AS h USING (machine_id, component)
+CROSS JOIN ref_window AS w
+JOIN rule_action AS a ON a.priority = CASE
+    WHEN s.failure_rank <= 10 AND s.model IN ('model1', 'model2') THEN 1
+    WHEN epoch(w.window_end - h.latest_replacement) / 3600 > h.median_hours THEN 2
+    WHEN c.component IS NOT NULL THEN 3 ELSE 4 END
 ORDER BY network_position;
 
 CREATE OR REPLACE VIEW vw_events_monthly AS

@@ -41,6 +41,18 @@ def test_exports():
         assert db.sql("""
             SELECT sum(failures), sum(reactive), sum(planned) FROM vw_events_monthly
         """).fetchone() == (761, 743, 2136)
+        assert db.sql("""
+            SELECT repair_hours, assumed_total_cost
+            FROM vw_cost_sensitivity ORDER BY repair_hours
+        """).fetchall() == [(4, 2622630), (8, 4056630), (12, 5490630),
+                             (24, 9792630), (48, 18348630)]
+        assert db.sql("""
+            SELECT machine_id, recommended_action FROM vw_top_assets
+            WHERE machine_id IN (83, 99) ORDER BY machine_id
+        """).fetchall() == [
+            (83, "Inspect comp4 before the next scheduled replacement"),
+            (99, "Check model fault pattern and review comp2 replacement interval"),
+        ]
         for name in ("vw_machine_monthly", "vw_cost_detail", "vw_events_monthly", "vw_top_assets"):
             exported = db.read_csv(str(DATABASE.parent / f"{name}.csv"))
             assert exported.count("*").fetchone() == db.table(name).count("*").fetchone()

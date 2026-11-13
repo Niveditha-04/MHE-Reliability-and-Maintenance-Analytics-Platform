@@ -36,4 +36,25 @@ and the count of events with a later maintenance record.
 - Assumed downtime cost allocates each event's downtime equally among its failed components and applies each component's assumed hourly cost. The cost falls in the month the event starts.
 - Asset risk averages fleet ranks for highest failures and lowest MTBF based on assumed repair hours. Rank 1 is worst. Equal values share a rank and leave a gap. A null MTBF ranks last.
 - The top 10 uses ascending risk score, descending failures, and ascending machine ID. The network top 10 stays fixed when site or model slicers change. Machines 17 and 22 both have 15 failures, 573.6 hours MTBF based on assumed repair hours, and a score of 3. Machine 17 precedes 22 by machine ID.
-- The top failing component has the most failures, with component code breaking ties. The action reviews its replacement interval. A machine without failures stays on routine inspection.
+- The top failing component has the most failures, with component code breaking ties. Actions follow the rules below.
+
+Failure count and MTBF are strongly related because MTBF is derived from
+failures and operating hours after downtime. The risk score mostly ranks
+failure count. Spearman rho is 0.997806 across 100 machines, using average
+ranks for ties and placing undefined MTBF last. A predicted-risk rank is
+planned for Phase 4.
+
+Action rules use the first matching condition in this order.
+
+1. A top-10 failure-count rank, including ties, and model1 or model2 prompt
+   a model fault-pattern check and a review of the top component's interval.
+2. A latest in-window replacement older than the fleet median interval for
+   that component prompts an inspection. The median uses intervals between
+   consecutive in-window replacements for the same machine and component.
+   Age is measured at the window end.
+3. A top failing component prompts a replacement interval review.
+4. A machine with no failure component stays on routine inspection.
+
+Cost sensitivity holds replacements and hourly rates fixed and recalculates
+event downtime at each assumed repair duration. The current assumed
+downtime cost is 500 per hour for every component.

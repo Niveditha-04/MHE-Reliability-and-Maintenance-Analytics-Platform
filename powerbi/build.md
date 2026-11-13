@@ -9,7 +9,7 @@ monthly aggregates and asset ranks.
 Import `dim_machine`, `dim_component`, `vw_machine_monthly`,
 `vw_events_monthly`, `vw_cost_detail`, and `vw_top_assets`. Use whole numbers
 for IDs and counts, dates for month, and decimal numbers for rates and hours.
-Create a month table with one row per month.
+Create a month table with one row per month for the shared monthly axis across the three facts.
 
 ```dax
 Month = DISTINCT(vw_machine_monthly[month])
@@ -81,14 +81,30 @@ Assumed Total Cost = [Assumed Replacement Cost] + [Assumed Downtime Cost]
    the site breakdown labeled simulated site mapping.
 2. Site and equipment drill-down. Use site, equipment type, and machine from
    the machine dimension. Plot monthly KPIs and add the asset table. Filter
-   network_position to 10 or less and sort ascending. Label it Network Top 10.
+   network_position to 10 or less and sort ascending. Label it “Network ranking, not filtered by slicers.”
 3. Failure and cost trends. Chart component failures by month. Plot Assumed
-   Replacement Cost and Assumed Downtime Cost as two series.
+   Replacement Cost and Assumed Downtime Cost as two series. Label every
+   cost visual “assumed repair hours and assumed downtime cost per hour.”
+   Add a small, disconnected network sensitivity chart. Use Enter Data
+   with the SQL results below. Sort by repair hours and sum total cost
+   per scenario. Refresh these values when the assumptions change.
 4. Maintenance and spare parts. Chart planned and reactive replacements by
    component. Reserve a space for forecast demand.
 
 Use a single palette. Label downtime-based visuals assumed repair hours.
 Label the maintenance interval and planned share as proxies.
+
+### Network cost sensitivity
+
+Assumed repair hours and assumed downtime cost per hour (500).
+
+| Repair h | Assumed replacement cost | Assumed downtime cost | Assumed total cost |
+| ---: | ---: | ---: | ---: |
+| 4 | 1185630 | 1437000 | 2622630 |
+| 8 | 1185630 | 2871000 | 4056630 |
+| 12 | 1185630 | 4305000 | 5490630 |
+| 24 | 1185630 | 8607000 | 9792630 |
+| 48 | 1185630 | 17163000 | 18348630 |
 
 ## Verification
 

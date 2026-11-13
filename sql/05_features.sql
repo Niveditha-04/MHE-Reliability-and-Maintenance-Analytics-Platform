@@ -1,4 +1,4 @@
-CREATE OR REPLACE TABLE model_features AS
+CREATE OR REPLACE TABLE model_feature_grid AS
 WITH errors AS (
     SELECT machine_id, datetime,
            count(*) FILTER (WHERE error_id = 'error1') AS error1,
@@ -28,6 +28,7 @@ WITH errors AS (
     SELECT t.machine_id, t.datetime, m.age, m.model,
            row_number() OVER h AS hour_number,
            max(t.datetime) OVER (PARTITION BY t.machine_id) AS last_hour,
+           max(f.datetime IS NOT NULL) OVER (PARTITION BY t.machine_id ORDER BY t.datetime ROWS BETWEEN 25 FOLLOWING AND 48 FOLLOWING) AS target_later,
            min(f.datetime) OVER (
                PARTITION BY t.machine_id ORDER BY t.datetime
                ROWS BETWEEN 1 FOLLOWING AND 24 FOLLOWING
@@ -75,13 +76,17 @@ WITH errors AS (
            window_start + INTERVAL 10 MONTH AS test_start
     FROM ref_window
 )
-SELECT * EXCLUDE (hour_number, last_hour, next_failure, validation_start, test_start),
+SELECT * EXCLUDE (next_failure, validation_start, test_start),
        (next_failure IS NOT NULL)::INTEGER AS target,
        CASE WHEN datetime < validation_start THEN 'train'
             WHEN datetime < test_start THEN 'validation' ELSE 'test' END AS split
-FROM hourly CROSS JOIN split_bounds
+FROM hourly CROSS JOIN split_bounds;
+
+CREATE OR REPLACE TABLE model_features AS
+SELECT * EXCLUDE (hour_number, last_hour, target_later)
+FROM model_feature_grid
 WHERE hour_number > 24 AND datetime + INTERVAL 24 HOUR <= last_hour
-  AND datetime NOT BETWEEN validation_start - INTERVAL 24 HOUR
-                       AND validation_start - INTERVAL 1 HOUR
-  AND datetime NOT BETWEEN test_start - INTERVAL 24 HOUR
-                       AND test_start - INTERVAL 1 HOUR;
+  AND datetime NOT BETWEEN (SELECT window_start FROM ref_window) + INTERVAL 8 MONTH - INTERVAL 24 HOUR
+                       AND (SELECT window_start FROM ref_window) + INTERVAL 8 MONTH - INTERVAL 1 HOUR
+  AND datetime NOT BETWEEN (SELECT window_start FROM ref_window) + INTERVAL 10 MONTH - INTERVAL 24 HOUR
+                       AND (SELECT window_start FROM ref_window) + INTERVAL 10 MONTH - INTERVAL 1 HOUR;

@@ -75,7 +75,8 @@ if __name__ == "__main__":
             assert hours([bounds[before][1]])[0] + 24 < hours([bounds[after][0]])[0]
         assert db.sql("""
             SELECT count(*), count(DISTINCT machine_id),
-                   count(*) FILTER (WHERE mean_risk BETWEEN 0 AND 1)
+                   count(*) FILTER (WHERE mean_risk BETWEEN 0 AND 1
+                       AND threshold_share BETWEEN 0 AND 1 AND predicted_risk IS NOT NULL)
             FROM model_machine_risk
         """).fetchone() == (100, 100, 100)
     print("Leakage, split, alert, bootstrap and risk checks passed")

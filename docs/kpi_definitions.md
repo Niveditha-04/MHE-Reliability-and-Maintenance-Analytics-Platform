@@ -41,16 +41,18 @@ and the count of events with a later maintenance record.
 Failure count and MTBF are strongly related because MTBF is derived from
 failures and operating hours after downtime. The risk score mostly ranks
 failure count. Spearman rho is 0.997806 across 100 machines, using average
-ranks for ties and placing undefined MTBF last. A predicted-risk rank is
-planned for Phase 4.
+ranks for ties and placing undefined MTBF last. The score currently averages the failure rank and MTBF rank, which are
+almost the same ranking (Spearman 0.998). Phase 4 replaces the MTBF rank
+with the predicted-risk rank.
 
 Action rules use the first matching condition in this order.
 
-1. A top-10 failure-count rank, including ties, and model1 or model2 prompt
+1. A top-10 failure-count rank, including ties, and a model failure rate above
+   the network failure rate prompt
    a model fault-pattern check and a review of the top component's interval.
-2. A latest in-window replacement older than the fleet median interval for
+2. A latest replacement before window end older than the fleet median interval for
    that component prompts an inspection. The median uses intervals between
-   consecutive in-window replacements for the same machine and component.
+   consecutive replacements before window end, including 2014 for the same machine and component.
    Age is measured at the window end.
 3. A top failing component prompts a replacement interval review.
 4. A machine with no failure component stays on routine inspection.
@@ -58,3 +60,7 @@ Action rules use the first matching condition in this order.
 Cost sensitivity holds replacements and hourly rates fixed and recalculates
 event downtime at each assumed repair duration. The current assumed
 downtime cost is 500 per hour for every component.
+
+The reporting month starts at 06:00 on the first. Component slicers filter
+only the event and cost tables. The cost view splits simultaneous
+multi-component event downtime equally across the failed components.

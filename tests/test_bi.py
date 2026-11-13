@@ -50,9 +50,25 @@ def test_exports():
             SELECT machine_id, recommended_action FROM vw_top_assets
             WHERE machine_id IN (83, 99) ORDER BY machine_id
         """).fetchall() == [
-            (83, "Inspect comp4 before the next scheduled replacement"),
+            (83, "Review replacement interval for comp4"),
             (99, "Check model fault pattern and review comp2 replacement interval"),
         ]
+        assert db.sql("""
+            SELECT count(*), count(DISTINCT reporting_month),
+                   bool_and(window_hours = date_diff('hour', reporting_month,
+                                                    reporting_month + INTERVAL 1 MONTH))
+            FROM vw_machine_monthly
+        """).fetchone() == (1200, 12, True)
+        assert db.sql("""
+            SELECT count(*) FROM (
+                SELECT machine_id FROM vw_machine_monthly GROUP BY machine_id
+                HAVING count(*) <> 12 OR count(DISTINCT reporting_month) <> 12
+            )
+        """).fetchone() == (0,)
+        sensitivity = db.read_csv(str(DATABASE.parent / "vw_cost_sensitivity.csv"))
+        assert sensitivity.order("repair_hours").fetchall() == db.sql("""
+            FROM vw_cost_sensitivity ORDER BY repair_hours
+        """).fetchall()
         for name in ("vw_machine_monthly", "vw_cost_detail", "vw_events_monthly", "vw_top_assets"):
             exported = db.read_csv(str(DATABASE.parent / f"{name}.csv"))
             assert exported.count("*").fetchone() == db.table(name).count("*").fetchone()

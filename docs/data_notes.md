@@ -75,3 +75,6 @@ failure timestamp.
 | DC-E | 3 | 8.5 | 19 | 49 / 178 (27.53%) |
 
 Two events have downtime below 12 hours, both from 03:00 to 06:00 on 2015-01-02. Machine 73 had its next failure and maintenance at 06:00. Machine 79 had its next maintenance at 06:00.
+
+The GitHub Actions sample should keep full hourly data for a small set of
+machines, such as five. Select by machine rather than truncating by row count.

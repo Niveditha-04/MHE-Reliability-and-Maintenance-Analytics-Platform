@@ -6,13 +6,15 @@ monthly aggregates and asset ranks.
 
 ## Model
 
+Disable Auto date/time in Options before importing the seven CSVs.
+
 Import `dim_machine`, `dim_component`, `vw_machine_monthly`,
-`vw_events_monthly`, `vw_cost_detail`, and `vw_top_assets`. Use whole numbers
+`vw_events_monthly`, `vw_cost_detail`, `vw_top_assets`, and `vw_cost_sensitivity`. Use whole numbers
 for IDs and counts, dates for month, and decimal numbers for rates and hours.
 Create a month table with one row per month for the shared monthly axis across the three facts.
 
 ```dax
-Month = DISTINCT(vw_machine_monthly[month])
+Month = DISTINCT(vw_machine_monthly[reporting_month])
 ```
 
 Use one-to-many, single-direction relationships from dimensions to facts.
@@ -26,11 +28,11 @@ site, model, and equipment labels in the leaderboard itself.
 | dim_machine | vw_cost_detail | machine_id |
 | dim_component | vw_events_monthly | component |
 | dim_component | vw_cost_detail | component |
-| Month | vw_machine_monthly | month |
-| Month | vw_events_monthly | month |
-| Month | vw_cost_detail | month |
+| Month | vw_machine_monthly | reporting_month |
+| Month | vw_events_monthly | reporting_month |
+| Month | vw_cost_detail | reporting_month |
 
-Sync slicers using `dim_machine[site_id]` and `dim_machine[model]`.
+Place the component slicer only on pages 3 and 4. Sync slicers using `dim_machine[site_id]` and `dim_machine[model]`.
 
 ## Measures
 
@@ -85,9 +87,8 @@ Assumed Total Cost = [Assumed Replacement Cost] + [Assumed Downtime Cost]
 3. Failure and cost trends. Chart component failures by month. Plot Assumed
    Replacement Cost and Assumed Downtime Cost as two series. Label every
    cost visual “assumed repair hours and assumed downtime cost per hour.”
-   Add a small, disconnected network sensitivity chart. Use Enter Data
-   with the SQL results below. Sort by repair hours and sum total cost
-   per scenario. Refresh these values when the assumptions change.
+   Chart assumed total cost by repair hours using the disconnected
+   `vw_cost_sensitivity` CSV.
 4. Maintenance and spare parts. Chart planned and reactive replacements by
    component. Reserve a space for forecast demand.
 

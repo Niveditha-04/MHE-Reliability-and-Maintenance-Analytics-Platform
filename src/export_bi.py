@@ -1,18 +1,16 @@
 import duckdb
 
-from load_data import DATABASE, ROOT
+from load_data import DATABASE
 
 TABLES = (
     "dim_machine", "dim_component", "vw_cost_detail", "vw_top_assets",
-    "vw_events_monthly", "vw_machine_monthly",
+    "vw_events_monthly", "vw_machine_monthly", "vw_cost_sensitivity",
 )
 
 
 
 def export():
-    sql = (ROOT / "sql" / "04_bi.sql").read_text()
-    with duckdb.connect(str(DATABASE)) as db:
-        db.execute(sql)
+    with duckdb.connect(str(DATABASE), read_only=True) as db:
         for table in TABLES:
             db.table(table).write_csv(str(DATABASE.parent / f"{table}.csv"), header=True)
 

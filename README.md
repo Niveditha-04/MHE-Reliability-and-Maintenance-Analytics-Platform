@@ -30,7 +30,7 @@ Python, DuckDB, SQL, and Git.
 - `src/` contains the loader, quality runner, KPI builder, and exporter.
 - `tests/` contains reconciliation and fixture checks.
 - `docs/` contains data notes and KPI definitions.
-- `data/processed/` contains the local database and six dashboard CSVs.
+- `data/processed/` contains the local database and seven dashboard CSVs.
 
 ## How to run
 
@@ -40,6 +40,7 @@ python src/load_data.py
 python src/run_quality.py
 python src/build_kpis.py
 python src/export_bi.py
+python tests/test_quality.py
 python tests/test_kpis.py
 python tests/test_bi.py
 ```

@@ -1,6 +1,5 @@
 /data/raw/
 /data/processed/
-/data:raw:/
 .env
 .env.*
 *.duckdb
@@ -8,14 +7,3 @@
 __pycache__/
 .venv/
 .DS_Store
-.agents/
-*.prompt
-.github/copilot-instructions.md
-.github/instructions/
-.gemini/
-GEMINI.md
-AGENTS.md
-.windsurf/
-.windsurfrules
-.aider*
-.continue/

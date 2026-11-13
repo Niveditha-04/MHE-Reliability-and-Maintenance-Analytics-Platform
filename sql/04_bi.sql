@@ -44,12 +44,15 @@ WITH components AS (
     FROM vw_kpi_machine
 )
 SELECT r.* EXCLUDE (failure_rank, mtbf_rank), c.component AS top_failing_component,
+       'network' AS rank_scope,
        (failure_rank + mtbf_rank) / 2.0 AS risk_score,
-       coalesce(a.recommended_action, 'Continue routine inspection') AS recommended_action
+       coalesce(a.recommended_action, 'Continue routine inspection') AS recommended_action,
+       row_number() OVER (ORDER BY (failure_rank + mtbf_rank), r.failures DESC, r.machine_id)
+           AS network_position
 FROM ranks AS r
 LEFT JOIN components AS c USING (machine_id)
 LEFT JOIN rule_action AS a USING (component)
-ORDER BY risk_score, r.failures DESC, r.machine_id;
+ORDER BY network_position;
 
 CREATE OR REPLACE VIEW vw_events_monthly AS
 WITH failures AS (

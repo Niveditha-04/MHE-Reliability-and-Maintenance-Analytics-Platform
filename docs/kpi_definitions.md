@@ -35,5 +35,5 @@ and the count of events with a later maintenance record.
 - Assumed replacement cost sums the part and labor costs for each in-window replacement.
 - Assumed downtime cost allocates each event's downtime equally among its failed components and applies each component's assumed hourly cost. The cost falls in the month the event starts.
 - Asset risk averages fleet ranks for highest failures and lowest MTBF based on assumed repair hours. Rank 1 is worst. Equal values share a rank and leave a gap. A null MTBF ranks last.
-- The top 10 uses ascending risk score, descending failures, and ascending machine ID. Site and model filters select from the fleet ranks.
+- The top 10 uses ascending risk score, descending failures, and ascending machine ID. The network top 10 stays fixed when site or model slicers change. Machines 17 and 22 both have 15 failures, 573.6 hours MTBF based on assumed repair hours, and a score of 3. Machine 17 precedes 22 by machine ID.
 - The top failing component has the most failures, with component code breaking ties. The action reviews its replacement interval. A machine without failures stays on routine inspection.

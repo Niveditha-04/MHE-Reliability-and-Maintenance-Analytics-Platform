@@ -34,6 +34,13 @@ def test_exports():
         assert db.sql("""
             SELECT count(*), count(DISTINCT machine_id) FROM vw_top_assets
         """).fetchone() == (100, 100)
+        assert db.sql("""
+            SELECT list(machine_id ORDER BY network_position), count(DISTINCT rank_scope), min(rank_scope)
+            FROM vw_top_assets WHERE network_position <= 10
+        """).fetchone() == ([99, 98, 17, 22, 37, 83, 20, 71, 16, 13], 1, "network")
+        assert db.sql("""
+            SELECT sum(failures), sum(reactive), sum(planned) FROM vw_events_monthly
+        """).fetchone() == (761, 743, 2136)
         for name in ("vw_machine_monthly", "vw_cost_detail", "vw_events_monthly", "vw_top_assets"):
             exported = db.read_csv(str(DATABASE.parent / f"{name}.csv"))
             assert exported.count("*").fetchone() == db.table(name).count("*").fetchone()

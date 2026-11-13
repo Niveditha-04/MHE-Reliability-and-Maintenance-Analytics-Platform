@@ -43,15 +43,15 @@ Action rules use the first matching condition in this order.
 1. A top-10 network position and a model failure rate above
    the network failure rate prompt
    a model fault-pattern check and a review of the top component's interval.
-2. A latest replacement before window end older than the fleet median interval for
-   that component prompts an inspection. The median uses intervals between
+2. An inspection applies when the last replacement before window end is
+   older than the fleet median interval for that component. The median uses intervals between
    consecutive replacements before window end, including 2014 for the same machine and component.
    Age is measured at the window end.
 3. A top failing component prompts a replacement interval review.
 4. A machine with no failure component stays on routine inspection.
 
 Cost sensitivity holds replacements and hourly rates fixed and recalculates
-event downtime at each assumed repair duration. The current assumed
+event downtime at each assumed repair duration. The assumed
 downtime cost is 500 per hour for every component.
 
 The reporting month starts at 06:00 on the first. Component slicers filter

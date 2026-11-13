@@ -1,8 +1,7 @@
 # Source data
 
-The five CSVs are from the Microsoft Azure Predictive Maintenance dataset. On
-Kaggle, open the dataset, select Download, and extract the five CSVs into
-`data/raw/`. If telemetry comes in a separate ZIP, extract that file too.
+The five CSVs come from the Microsoft Azure Predictive Maintenance dataset.
+The loader reads the extracted files from `data/raw/`.
 [Microsoft Azure Predictive Maintenance on Kaggle](https://www.kaggle.com/datasets/arnabbiswas1/microsoft-azure-predictive-maintenance)
 
 | CSV | Rows | What one row represents |
@@ -13,11 +12,10 @@ Kaggle, open the dataset, select Download, and extract the five CSVs into
 | `PdM_failures.csv` | 761 | A failure of component `failure` on one machine at a timestamp. |
 | `PdM_machines.csv` | 100 | A machine with its model and age. |
 
-Join each event table to machines on `machineID`. To align events with
-telemetry at the same hour, use both `machineID` and `datetime`. Use the
-component as well when matching a failure to a replacement (`failure` to
-`comp`). Aggregate events to one row per machine-hour before joining them to
-hourly telemetry if the output needs to keep that grain.
+Event tables join to machines on `machineID`. Events align with telemetry
+on `machineID` and `datetime`. Failure and replacement matches also use the
+component (`failure` to `comp`). Aggregation to one row per machine-hour
+preserves the telemetry grain.
 
 | Table | Earliest timestamp | Latest timestamp |
 | --- | --- | --- |
@@ -32,11 +30,11 @@ before telemetry. The action rules use 2014 replacements as history.
 Replacement KPI counts exclude them.
 
 The 761 failure rows represent component failures. Two components can fail on
-the same machine at the same time. Count failures by machine, timestamp, and
-failure component together.
+the same machine at the same time. Failure counts use the machine, timestamp,
+and component together.
 
-Run `python3 src/inspect_data.py` from the project root with Python 3.11
-or later. It prints the shape, column names, parsed types, timestamp range,
+The inspection command, `python3 src/inspect_data.py`, runs from the
+project root with Python 3.11 or later. It prints the shape, column names, parsed types, timestamp range,
 and five sample rows per file. It checks parsed row counts against file
 line counts after allowing for each header.
 
@@ -76,5 +74,5 @@ failure timestamp.
 
 Two events have downtime below 12 hours, both from 03:00 to 06:00 on 2015-01-02. Machine 73 had its next failure and maintenance at 06:00. Machine 79 had its next maintenance at 06:00.
 
-The GitHub Actions sample should keep full hourly data for a small set of
-machines, such as five. Select by machine rather than truncating by row count.
+The GitHub Actions sample contains the full hourly grid for five
+synthetic machines.

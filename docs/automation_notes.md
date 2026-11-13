@@ -19,9 +19,9 @@ Kaggle dataset license: [pending verification].
 The repository contains no source CSV rows.
 
 Full mode checks data quality, refreshes KPI views, and exports dashboard
-CSVs from the existing model and forecast tables. Run
+CSVs from the existing model and forecast tables. The commands
 `python src/train_model.py`, `python src/score_machines.py`, and
-`python src/forecast_parts.py` before the full report to rebuild those outputs.
+`python src/forecast_parts.py` rebuild those tables before the full report.
 
 The artifact contains the Markdown report and quality CSV. The workflow
 cache holds two dated KPI snapshots. A missing prior-week snapshot gives

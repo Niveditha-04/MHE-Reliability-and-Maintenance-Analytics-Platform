@@ -8,8 +8,8 @@ maintenance activity, and reliability over the observation window.
 ## Data
 
 The Microsoft Azure Predictive Maintenance dataset contains 100 machines,
-hourly telemetry, errors, component replacements, and failures. Download the
-five CSVs and extract them into `data/raw/`.
+hourly telemetry, errors, component replacements, and failures. The
+pipeline reads the five extracted CSVs from `data/raw/`.
 [Dataset](https://www.kaggle.com/datasets/arnabbiswas1/microsoft-azure-predictive-maintenance)
 
 ## Simulated and assumed items
@@ -30,6 +30,7 @@ Python, DuckDB, SQL, pandas, NumPy, scikit-learn, and Git.
 - `src/` contains the loader, quality runner, KPI builder, and exporter.
 - `tests/` contains reconciliation and fixture checks.
 - `docs/` contains data notes and KPI definitions.
+- `dashboard/` contains the dashboard build guide.
 - `data/processed/` contains the local database and dashboard CSVs.
 
 ## How to run
@@ -65,9 +66,9 @@ python tests/test_report.py
 The sample command loads the synthetic CSVs into a temporary database,
 runs quality checks, builds features, trains and scores the model, builds
 KPI views, forecasts demand, and exports the dashboard tables. The full
-report command uses the existing full-data model and forecast tables. Run
-`python src/train_model.py`, `python src/score_machines.py`, and
-`python src/forecast_parts.py` before the full report to rebuild those tables.
+report command uses the existing full-data model and forecast tables.
+The commands for `train_model.py`, `score_machines.py`, and
+`forecast_parts.py` rebuild those tables before the full report.
 
 GitHub Actions runs the sample every Monday at 06:00 UTC and on manual
 dispatch. The artifact contains the weekly report and quality results.
@@ -82,15 +83,28 @@ report runs on static input.
 - Planned replacement share is 74.19%.
 - Assumed total cost is 5,490,630.
 - Test average precision is 0.997519 for boosting and 0.828968 for logistic regression.
-- At the selected threshold, 116 alerts cover 114 of 114 test failure events.
+- The test window contains 114 failure events.
 - The parts forecast uses 51 full weeks in 2015.
+- The top three assets are machine 99 (19 failures, score 4), machine 37
+  (14 failures, score 6), and machine 83 (14 failures, score 6).
+
+| Test policy | Alerts | Caught | Missed | Assumed cost |
+| --- | ---: | ---: | ---: | ---: |
+| Boosting | 116 | 114 | 0 | 11,600 |
+| Any error | 587 | 114 | 0 | 58,700 |
+| No alerts | 0 | 0 | 114 | 684,000 |
+
+| Component | Forecast method | MAE, replacements |
+| --- | --- | ---: |
+| comp1 | 8-week mean | 2.268 |
+| comp2 | 8-week mean | 3.196 |
+| comp3 | 8-week mean | 3.146 |
+| comp4 | 4-week mean | 2.702 |
 
 ## Dashboard
 
-Four pages cover network reliability, site and equipment drill-down with a
-network top 10, component failures and assumed costs, and maintenance and
-spare parts. Labels identify the simulated site mapping, assumed repair
-hours, assumed downtime cost per hour, and proxy measures.
+The [dashboard build guide](dashboard/build.md) is in `dashboard/`.
+Dashboard verification is pending.
 
 ## Limits
 

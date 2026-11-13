@@ -20,10 +20,10 @@ by validation average precision. The metric is average precision, with
 95% percentile intervals from 1,000 machine bootstrap samples. Validation
 permutation importance measures the drop in average precision.
 
-The threshold minimizes assumed validation cost over 501 thresholds spaced in logit space and
-a no-alert threshold. An alert suppresses further alerts for 24 hours. Validation and test policy
-scoring include the 24 hours before the split. Those scores carry no
-training or evaluation labels.
+The threshold minimizes assumed validation cost across 501 logit-spaced
+thresholds and a no-alert threshold. An alert suppresses further alerts
+for 24 hours. Validation and test policy scoring include 24 unlabeled
+hours before each split.
 A failure is caught when an alert fired in the preceding 24 hours, excluding
 the event hour. Inspection costs 100 per alert. Missed-event cost uses the
 assumed repair duration times the assumed hourly downtime rate, which is
@@ -34,10 +34,12 @@ and are not calibrated probabilities.
 
 Parts demand counts Monday 06:00 to Monday 06:00 replacements, with partial
 weeks excluded. Four- and eight-week means and simple exponential smoothing
-are compared on rolling origins over the final 12 weeks. The smoothing
-parameter is selected on earlier 2015 weeks, beginning January 5 at 06:00. MAE uses only horizons with known
-actuals. The four weeks after the last full source week use 80% Poisson ranges conditional on each point forecast. Empirical residual
-quantiles provide a fallback when pooled coverage for a component is below
+are compared with lag-2, parity mean, and a calendar proxy on rolling
+origins over the final 12 weeks. Smoothing uses earlier 2015 weeks,
+starting January 5 at 06:00. MAE uses horizons with known actuals. The
+four forecast weeks use 80% Poisson ranges conditional on each point
+forecast. Empirical residual
+quantiles provide a fallback when coverage for the selected method and component is below
 70%. All four components meet the coverage cutoff. Planned replacements follow
 a fixed cycle, so the reactive part is the less predictable part.
 

@@ -28,8 +28,8 @@ hourly telemetry if the output needs to keep that grain.
 
 Each machine has 8,761 hourly telemetry rows, including both endpoints.
 Source timestamps carry no time zone. Maintenance starts in June 2014,
-before telemetry. Use 2014 replacements only for hours-since-last-replacement
-features and exclude them from 2015 KPIs.
+before telemetry. The action rules use 2014 replacements as history.
+Replacement KPI counts exclude them.
 
 The 761 failure rows represent component failures. Two components can fail on
 the same machine at the same time. Count failures by machine, timestamp, and

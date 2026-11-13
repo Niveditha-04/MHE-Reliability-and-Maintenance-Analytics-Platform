@@ -23,10 +23,17 @@ def test_report():
         reports = root / "reports"
         env = os.environ | {"MHE_DATABASE": str(database),
                             "MHE_SAMPLE_DIR": str(ROOT / "data" / "sample")}
-        assert command("src/weekly_report.py", "--sample", "--reports", str(reports)) == 0
+        exports = root / "exports"
+        assert command("src/weekly_report.py", "--sample", "--reports", str(reports),
+                       "--sample-exports", str(exports)) == 0
+        assert len(list(exports.glob("*.csv"))) == 13
         report = reports / "weekly_report.md"
         assert report.read_text().startswith("Status: PASSED\n")
-        assert "Scope: sample" in report.read_text()
+        title, blank, scope = report.read_text().splitlines()[2:5]
+        assert (title, blank, scope) == (
+            "# Weekly reliability report", "",
+            "Scope: synthetic sample, not the Kaggle data. Values show that the pipeline runs and are not results.",
+        )
         assert command("src/load_data.py", env=env) == 0
         copy = root / "broken.duckdb"
         copy.write_bytes(database.read_bytes())

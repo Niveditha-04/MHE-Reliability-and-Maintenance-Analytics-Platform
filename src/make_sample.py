@@ -24,9 +24,10 @@ def make():
     assert set(MACHINES) <= ids
 
     telemetry, errors, maintenance, failures = [], [], [], []
-    for index, machine in enumerate(MACHINES):
-        events = {240 + index * 29 + step * (510 + 5 * index): PARTS[step % 4]
+    for index, (machine, spacing) in enumerate(zip(MACHINES, (510, 515, 520, 525, 520))):
+        events = {240 + index * 29 + step * spacing: PARTS[step % 4]
                   for step in range(17)}
+        assert len(events) == 17 and max(events) < 8760
         for offset in range(8761):
             time = START + offset * HOUR
             signal = int(any(offset + lead in events for lead in range(1, 25)))

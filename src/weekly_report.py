@@ -74,8 +74,10 @@ def publish(database, reports, scope, today, rebuild):
         """).fetchall()
     week = today - timedelta(days=today.weekday())
     changes = snapshot(reports / f"{scope}_snapshot.csv", week, values)
-    lines = ["Status: PASSED", "", "# Weekly reliability report", "",
-             f"Scope: {scope}. Week starting {week}.", "",
+    scope_line = ("Scope: synthetic sample, not the Kaggle data. Values show that the pipeline runs and are not results."
+                  if scope == "sample" else "Scope: full dataset.")
+    lines = ["Status: PASSED", "", "# Weekly reliability report", "", scope_line, "",
+             f"Week starting {week}.", "",
              f"Data quality: passed with {warnings} warning checks.", "",
              "| KPI | Value | Change from prior week |", "| --- | ---: | ---: |"]
     for label, value, change in zip(LABELS, values, changes):
@@ -96,6 +98,7 @@ def main():
     parser.add_argument("--sample", action="store_true")
     parser.add_argument("--database", type=Path, default=DATABASE)
     parser.add_argument("--reports", type=Path)
+    parser.add_argument("--sample-exports", type=Path, default=ROOT / "data" / "processed" / "sample")
     parser.add_argument("--as-of", type=date.fromisoformat, default=date.today())
     args = parser.parse_args()
     if args.reports is None:
@@ -109,7 +112,7 @@ def main():
         step("load_data.py", env)
         status = publish(database, args.reports, "sample", args.as_of, True)
         if status == 0:
-            exports = ROOT / "data" / "processed" / "sample"
+            exports = args.sample_exports
             exports.mkdir(parents=True, exist_ok=True)
             for file in database.parent.glob("*.csv"):
                 shutil.copyfile(file, exports / file.name)

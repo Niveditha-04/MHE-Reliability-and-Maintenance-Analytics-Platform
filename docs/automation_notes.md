@@ -10,13 +10,23 @@ for each machine. Machine IDs come from the simulated mapping. All sensor
 values, model assignments, and events are generated. The training,
 validation, and test dates match the full-data pipeline. The permutation
 test uses at most the available validation rows. Sample results describe
-the generated data.
+the generated data. Sample failures are evenly spaced within each machine,
+with an error 24 hours before each one. The fixture encodes the failure
+signal, so model scores on the sample are near perfect and say nothing
+about real data. Ties in the top five come from the generator.
 
-The source dataset's redistribution terms could not be verified from the
-Kaggle listing. The sample generator uses no source CSV rows.
+Kaggle license check, 13 Nov 2026. The dataset page did not expose a
+readable license line. The license was not verified. The repository
+contains no source CSV rows.
+
+Full mode checks data quality, refreshes KPI views, and exports dashboard
+CSVs from the existing model and forecast tables. Run `python
+src/train_model.py`, `python src/score_machines.py`, and `python
+src/forecast_parts.py` before the full report to rebuild those outputs.
 
 The artifact contains the Markdown report and quality CSV. The workflow
 cache holds two dated KPI snapshots. A missing prior-week snapshot gives
-an unavailable change. With static input and calculations, comparable
+an unavailable change. The workflow cache can expire after seven days
+without access. The next change then shows “Unavailable.” With static input and calculations, comparable
 runs give zero change. The snapshot tracks report runs and does not
 represent newly observed equipment data.

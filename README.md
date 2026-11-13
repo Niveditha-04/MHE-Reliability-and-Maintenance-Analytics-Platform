@@ -27,11 +27,26 @@ Python, DuckDB, SQL, pandas, NumPy, scikit-learn, and Git.
 ## Structure
 
 - `sql/` defines tables, checks, KPIs, and dashboard views.
-- `src/` contains the loader, quality runner, KPI builder, and exporter.
 - `tests/` contains reconciliation and fixture checks.
 - `docs/` contains data notes and KPI definitions.
 - `dashboard/` contains the dashboard build guide.
 - `data/processed/` contains the local database and dashboard CSVs.
+
+| Job | Scripts in `src/` |
+| --- | --- |
+| Source inspection | `inspect_data.py` |
+| Simulated mapping | `make_mapping.py` |
+| Data loader | `load_data.py` |
+| Data quality | `run_quality.py` |
+| Features and model training | `train_model.py` |
+| Alert policy and cost | `alert_policy.py` |
+| Machine scoring | `score_machines.py` |
+| Parts forecast | `forecast_parts.py` |
+| KPI and dashboard views | `build_kpis.py` |
+| Dashboard CSV export | `export_bi.py` |
+| Weekly reporting | `weekly_report.py` |
+| Synthetic sample generation | `make_sample.py` |
+| Model and ranking audits | `model_audit.py`, `risk_audit.py` |
 
 ## How to run
 
@@ -108,23 +123,11 @@ Dashboard verification is pending.
 
 ## Limits
 
-The source covers one year and has no repair durations or actual costs.
-The any-error rule also catches all 114 test events. Boosting fires fewer alerts at the same recall.
-Average precision for failures 24 to 48 hours ahead is 0.83. The signal extends beyond the next 24 hours.
-The validation comparison covers two boosting settings.
-The data is synthetic. The model score makes no claim about real equipment.
-Site and equipment groupings are simulated.
+- The telemetry covers one year.
+- The source has no repair durations or actual costs.
+- Site and equipment mappings are simulated.
+- Parts, labor, and downtime costs are assumed.
+- The source dataset is synthetic. The project generates the CI sample.
 
-Alerts cost 100 and a missed event costs at least 1,000. Event scores are
-well separated from other hours. One threshold wins at every tested cost
-ratio. The search found no cost trade-off.
-
-The 24-hour label concentrates lead times near 24 hours. The median is
-24 hours, the range is 8 to 26 hours, and no event had 48 hours of lead.
-
-Within models 1 to 3, half-year machine failure ranks have Spearman
-correlations of 0.03 to 0.10. Model differences account for much of the
-pooled 0.46. The ranking is labeled “failures plus alert history, Sep to Oct”.
-
-The 80% forecast intervals cover 83.3% of comp2 and 78.6% of comp3
-backtest observations for the selected methods.
+[Model notes](docs/model_notes.md) cover the alert threshold, lead time,
+asset ranking, and forecast interval coverage.

@@ -99,9 +99,9 @@ MTBF displays to two decimals. Counts and costs display as whole numbers.
 
 ## Publishing
 
-Tableau Public publishes data extracts with the workbook. The owner checks
-the Kaggle license before publishing. If redistribution is restricted,
-the public workbook uses only permitted summary extracts by model,
-component, and month and excludes all machine-level rows. If the license
-also restricts those summaries, the workbook stays local.
+Tableau Public publishes data extracts with the workbook. Publishing
+depends on the dataset license. If redistribution is restricted, only
+permitted summary extracts by model, component, and month are eligible
+for publication. Those extracts exclude machine-level rows. The workbook
+stays local if the license also restricts those summaries.
 [Tableau Public FAQ](https://help.tableau.com/current/pro/desktop/en-us/public_faq.htm)

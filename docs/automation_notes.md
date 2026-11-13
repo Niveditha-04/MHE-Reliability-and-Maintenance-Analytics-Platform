@@ -15,8 +15,7 @@ with an error 24 hours before each one. The fixture encodes the failure
 signal, so model scores on the sample are near perfect and say nothing
 about real data. Ties in the top five come from the generator.
 
-Kaggle dataset license: [pending verification].
-The repository contains no source CSV rows.
+Kaggle dataset license: Unknown on the dataset page, checked 13 Nov 2026. The repository contains no source CSV rows.
 
 Full mode checks data quality, refreshes KPI views, and exports dashboard
 CSVs from the existing model and forecast tables. The commands

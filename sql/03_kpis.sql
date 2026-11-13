@@ -1,7 +1,11 @@
 CREATE OR REPLACE VIEW vw_window_failures AS
-SELECT DISTINCT machine_id, datetime, component
-FROM fact_failure CROSS JOIN ref_window
-WHERE datetime >= window_start AND datetime < window_end;
+SELECT DISTINCT f.machine_id, f.datetime, f.component,
+       NOT EXISTS (
+           SELECT 1 FROM fact_maintenance AS m
+           WHERE m.machine_id = f.machine_id AND m.datetime = f.datetime AND m.component = f.component
+       ) AS failure_without_replacement
+FROM fact_failure AS f CROSS JOIN ref_window
+WHERE f.datetime >= window_start AND f.datetime < window_end;
 
 CREATE OR REPLACE VIEW vw_replacement_class AS
 SELECT m.maintenance_id, m.machine_id, m.datetime, m.component,
@@ -56,6 +60,9 @@ WITH events AS (
     SELECT machine_id, sum(components_failed) AS failures, sum(downtime_hours) AS downtime_hours,
            sum(mttr_hours) AS mttr_total, count(mttr_hours) AS mttr_events
     FROM vw_downtime_events GROUP BY machine_id
+), unmatched AS (
+    SELECT machine_id, count(*) AS failures_without_replacement
+    FROM vw_window_failures WHERE failure_without_replacement GROUP BY machine_id
 ), replacements AS (
     SELECT machine_id, count(*) FILTER (WHERE replacement_class = 'reactive') AS reactive,
            count(*) FILTER (WHERE replacement_class = 'planned') AS planned
@@ -64,9 +71,11 @@ WITH events AS (
 SELECT m.machine_id, m.site_id, m.equipment_type, m.model, w.window_hours,
        coalesce(e.failures, 0) AS failures, coalesce(e.downtime_hours, 0) AS downtime_hours,
        coalesce(e.mttr_total, 0) AS mttr_total, coalesce(e.mttr_events, 0) AS mttr_events,
+       coalesce(u.failures_without_replacement, 0) AS failures_without_replacement,
        coalesce(r.reactive, 0) AS reactive, coalesce(r.planned, 0) AS planned
 FROM dim_machine AS m CROSS JOIN ref_window AS w
 LEFT JOIN events AS e USING (machine_id)
+LEFT JOIN unmatched AS u USING (machine_id)
 LEFT JOIN replacements AS r USING (machine_id);
 
 CREATE OR REPLACE VIEW vw_kpi_totals AS
@@ -75,6 +84,7 @@ SELECT grouping_id(machine_id, site_id, equipment_type, model) AS scope,
        sum(window_hours) AS window_hours, sum(downtime_hours) AS downtime_hours,
        sum(window_hours - downtime_hours) AS operating_hours, sum(failures) AS failures,
        sum(mttr_total) AS mttr_total, sum(mttr_events) AS mttr_events,
+       sum(failures_without_replacement) AS failures_without_replacement,
        sum(reactive) AS reactive, sum(planned) AS planned
 FROM vw_machine_totals
 GROUP BY GROUPING SETS ((machine_id, site_id, equipment_type, model),

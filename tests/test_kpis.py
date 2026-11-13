@@ -54,6 +54,9 @@ def fixture():
         assert db.execute("""
             SELECT mttr_hours, downtime_hours FROM vw_downtime_events ORDER BY failure_time
         """).fetchall() == [(None, 3.0), (None, 12.0)]
+        assert db.execute("""
+            SELECT failures_without_replacement FROM vw_kpi_machine ORDER BY machine_id
+        """).fetchall() == [(1,), (0,)]
         db.execute("DELETE FROM fact_failure")
         assert db.execute("""
             SELECT min(downtime_hours), max(downtime_hours), min(availability_proxy_assumed_repair)
@@ -68,6 +71,14 @@ if __name__ == "__main__":
             SELECT failures, downtime_hours, mtbf_hours_assumed_repair, mttr_proxy_hours
             FROM vw_kpi_machine WHERE machine_id = 1
         """).fetchone() == (7, 84, (8760 - 84) / 7, 360)
+        assert database.execute("""
+            SELECT failures, downtime_hours, mtbf_hours_assumed_repair, mttr_proxy_hours
+            FROM vw_kpi_machine WHERE machine_id = 73
+        """).fetchone() == (12, 3 + 11 * 12, (8760 - 135) / 12, (3 + 10 * 360 + 1080) / 12)
+        assert database.execute("""
+            SELECT failures, failures_without_replacement
+            FROM vw_kpi_network
+        """).fetchone() == (761, 18)
     print("Source reconciliation and machine 1 hand check passed")
     fixture()
     print("In-memory KPI fixture passed")

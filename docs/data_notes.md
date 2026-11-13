@@ -60,3 +60,16 @@ and 51 (comp1) have their latest earlier replacement at the window start,
 2015-01-01 06:00:00.
 
 [Latest earlier replacement for all 18 failures](../reports/unmatched_failure_history.csv)
+
+The source does not explain why these 18 failures lack a replacement at the
+failure timestamp.
+
+## Failure spread by simulated site
+
+| Site | Minimum per machine | Median per machine | Maximum per machine | Top three machines' share |
+| --- | ---: | ---: | ---: | ---: |
+| DC-A | 0 | 7 | 15 | 41 / 150 (27.33%) |
+| DC-B | 2 | 7.5 | 15 | 41 / 155 (26.45%) |
+| DC-C | 2 | 7 | 12 | 33 / 137 (24.09%) |
+| DC-D | 0 | 7.5 | 13 | 35 / 141 (24.82%) |
+| DC-E | 3 | 8.5 | 19 | 49 / 178 (27.53%) |

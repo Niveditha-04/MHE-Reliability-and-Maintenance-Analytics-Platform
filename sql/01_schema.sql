@@ -75,3 +75,11 @@ FROM (VALUES
 CREATE OR REPLACE TABLE assumptions_repair AS
 SELECT 'assumed_repair_hours' AS parameter, 12 AS value,
        'assumed, no repair duration in source' AS basis;
+
+-- Inspection cost is assumed.
+CREATE OR REPLACE TABLE assumptions_model AS
+SELECT 'inspection_cost_per_alert' AS parameter, 100 AS value, 'assumed' AS basis;
+
+CREATE TABLE IF NOT EXISTS model_machine_risk (
+    machine_id BIGINT, mean_risk DOUBLE, predicted_risk_rank BIGINT
+);

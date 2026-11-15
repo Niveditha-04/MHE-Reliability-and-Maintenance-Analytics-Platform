@@ -119,7 +119,9 @@ report runs on static input.
 ## Dashboard
 
 The [dashboard build guide](dashboard/build.md) is in `dashboard/`.
-Dashboard verification is pending.
+Tableau Public is the dashboard tool. The Network overview page shows
+failures by model. The other pages are in progress. The workbook is kept
+local because the dataset license is Unknown.
 
 ## Limits
 

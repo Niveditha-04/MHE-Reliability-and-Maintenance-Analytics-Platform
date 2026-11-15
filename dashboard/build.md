@@ -90,7 +90,7 @@ MTBF displays to two decimals. Counts and costs display as whole numbers.
 | --- | --- | --- |
 | Network MTBF, assumed repair hours | 1,139.80 h | |
 | DC-A failures | 150 | |
-| Model 1 failures | 189 | |
+| Model 1 failures | 189 | 189 (match) |
 | comp2 failures | 259 | |
 | Assumed total cost | 5,490,630 | |
 | Assumed replacement cost | 1,185,630 | |

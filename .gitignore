@@ -10,3 +10,6 @@ __pycache__/
 /reports/*_snapshot.csv
 /reports/weekly_report.md
 /reports/sample/
+dashboard/*.twbx
+dashboard/*.twb
+dashboard/*.hyper

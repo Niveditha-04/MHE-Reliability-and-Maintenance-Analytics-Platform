@@ -118,10 +118,18 @@ report runs on static input.
 
 ## Dashboard
 
-The [dashboard build guide](dashboard/build.md) is in `dashboard/`.
-Tableau Public is the dashboard tool. The Network overview page shows
-failures by model. The other pages are in progress. The workbook is kept
-local because the dataset license is Unknown.
+Tableau Public is the dashboard tool. The workbook stays local because
+the dataset license is Unknown.
+
+| Page | Scope | Build status |
+| --- | --- | --- |
+| Network overview | Failures by model and site, with network reliability KPIs. | Failures by model is built. The other views and filters are pending. |
+| Site and equipment drill-down | Monthly machine KPIs and the network top 10. | Pending. |
+| Failure and cost trends | Monthly component failures, assumed costs, and repair-duration sensitivity. | Pending. |
+| Maintenance and spare parts | Replacement mix and weekly demand forecasts. | Pending. |
+
+The [dashboard build guide](dashboard/build.md) covers setup and verification.
+The [leadership summary](docs/leadership_summary.md) covers findings and actions.
 
 ## Limits
 

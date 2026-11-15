@@ -40,8 +40,8 @@ starting January 5 at 06:00. MAE uses horizons with known actuals. The
 four forecast weeks use 80% Poisson ranges conditional on each point
 forecast. Empirical residual
 quantiles provide a fallback when coverage for the selected method and component is below
-70%. All four components meet the coverage cutoff. Planned replacements follow
-a fixed cycle, so the reactive part is the less predictable part.
+70%. All four components meet the coverage cutoff. Planned replacements
+occur at regular intervals. Reactive replacements are less predictable.
 
 The source is synthetic. The model score makes no claim about real equipment.
 The source has one year of telemetry and few test failure events. Site and

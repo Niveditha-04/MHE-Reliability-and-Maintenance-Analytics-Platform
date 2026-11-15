@@ -35,7 +35,7 @@ and the count of events with a later maintenance record.
 - Assumed replacement cost sums the part and labor costs for each in-window replacement.
 - Assumed downtime cost allocates each event's downtime equally among its failed components and applies each component's assumed hourly cost. The cost falls in the month the event starts.
 - Asset risk averages the failure-count rank and the rank of the share of September and October hours at or above the alert threshold. Rank 1 is highest risk. Equal values share a rank and leave a gap. MTBF remains a separate metric.
-- The top 10 uses ascending risk score, descending failures, and ascending machine ID. The network top 10 stays fixed when site or model slicers change.
+- The top 10 uses ascending risk score, descending failures, and ascending machine ID. The network top 10 is independent of site and model slicers.
 - The top failing component has the most failures, with component code breaking ties. Actions follow the rules below.
 
 Action rules use the first matching condition in this order.
@@ -50,9 +50,9 @@ Action rules use the first matching condition in this order.
 3. A top failing component prompts a replacement interval review.
 4. A machine with no failure component stays on routine inspection.
 
-Cost sensitivity holds replacements and hourly rates fixed and recalculates
-event downtime at each assumed repair duration. The assumed
-downtime cost is 500 per hour for every component.
+Cost sensitivity uses the same replacements and hourly rates across all
+assumed repair durations and recalculates event downtime for each duration.
+The assumed downtime cost is 500 per hour for every component.
 
 The reporting month starts at 06:00 on the first. Component slicers filter
 only the event and cost tables. The cost view splits simultaneous

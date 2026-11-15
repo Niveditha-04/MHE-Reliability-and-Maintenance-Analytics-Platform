@@ -50,7 +50,8 @@ component codes are lowercase and have no leading or trailing spaces.
 
 [Unmatched failures and nearby maintenance](../reports/unmatched_failures.csv)
 
-Maintenance records follow a fixed cycle of about 15 days, so the interval to the next record is a schedule interval, not a repair time.
+Maintenance records occur at scheduled intervals of about 15 days. The
+time to the next record measures the interval between scheduled records.
 
 Sixteen of the 18 unmatched failures have their latest earlier replacement
 for the same machine and component before the window. Machines 17 (comp4)

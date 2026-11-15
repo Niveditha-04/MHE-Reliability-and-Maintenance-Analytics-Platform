@@ -80,7 +80,8 @@ calculations use the cost source. A zero denominator returns null.
 Site and equipment type carry the label “simulated site mapping”. Site
 and model filters apply to related fact sheets on pages 1 to 3. The
 component filter appears on pages 3 and 4. The standalone forecast uses
-its own component filter. The standalone network top 10 stays fixed.
+its own component filter. The standalone network top 10 is independent of
+dashboard filters.
 
 ## Verification
 
